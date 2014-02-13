@@ -1,0 +1,8 @@
+
+Sensors to provide power to:
+Laser Range Finder - USB from Udoo (5V)
+Visual Camera - (TBD)
+Kinect - USB from Udoo (5V)
+4 IR Cameras - 5V
+2 Udoo boards - consider 6V to 15V as the operating voltage range and 12V as the preferred operating voltage (we can use 11.1 or 7.4 V)
+Ardupilot - 5V
