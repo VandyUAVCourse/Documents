@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <staticlib>"
+  exit 1
+fi
+
+echo "Decompressing file $1"
+
+FILELIST=`ar -t $1`
+echo "Object files:"
+for i in $FILELIST; do
+  echo $i
+done
+
+echo "Generating ${1/%.a/.so}"
+
+ar -x $1
+ld -shared -o ${1/%.a/.so} $FILELIST
+
+rm $FILELIST

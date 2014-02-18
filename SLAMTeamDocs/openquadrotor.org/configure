@@ -1,0 +1,271 @@
+#!/bin/bash
+#if [ "$UID" = 0 ]; then echo "Please don't run configure as root"; exit 1; fi
+
+LINUX=0
+MACOSX=0
+
+if [ `uname` = "Linux" ]; then
+	LINUX=1
+	OSTYPE=LINUX
+	CPPFLAGS+="-DLINUX "
+fi
+if [ `uname` = "Darwin" ]; then
+	MACOSX=1
+	CPPFLAGS+="-DMACOSX "
+	OSTYPE=MACOSX
+fi
+
+# Large File System support
+CPPFLAGS+=`getconf LFS_CFLAGS`
+CFLAGS+=`getconf LFS_CFLAGS`
+LDFLAGS+=`getconf LFS_LDFLAGS`
+
+if [ ! $CXX ]; then
+	echo "No 'CXX' environment variable found, using g++.";
+	CXX="g++"
+fi
+
+if [ ! $CC ]; then
+	echo "No 'CC' environment variable found, using gcc.";
+	CC="gcc"
+fi
+
+if [ ! -x `which $CXX` ]; then
+	echo "Can't execute C++ compiler '$CXX'.";
+	exit 1;
+else	
+	echo "Using C++ compiler: $CXX"
+fi
+
+if [ ! -x `which $CC` ]; then
+	echo "Can't execute C++ compiler '$CC'.";
+	exit 1;
+else	
+	echo "Using C compiler: $CC"
+fi
+
+GCC_VERSION=`$CXX --version`
+
+echo -n "Checking for Qt 3.x ... "
+if [ ! "$QT_INCLUDE" ]; then
+
+#UIC="`whereis uic | grep -m 1 -io "[^ ]*bin/uic" | head -n 1`";
+#MOC="`whereis moc | grep -m 1 -io "[^ ]*bin/moc" | head -n 1` ";
+
+if [ -f /etc/debian_version ]; then
+  echo "found Debian (or Ubuntu) distribution"
+  QT_LIB="-L/usr/share/qt3/lib/ -lqt-mt"
+  QT_INCLUDE="-I /usr/include/qt3/"
+  MOC=/usr/bin/moc-qt3
+  UIC=/usr/bin/uic-qt3
+else
+  echo "Try to guess Qt variables"
+  for GUESS_QTDIR in `ls /usr/lib/ | grep -E "qt3|qt-3"`; do
+    if [ -d /usr/lib/$GUESS_QTDIR/include ]; then
+      QT_INCLUDE="-I /usr/lib/$GUESS_QTDIR/include";
+    fi
+    if [ -d /usr/share/$GUESS_QTDIR/include ]; then
+      QT_INCLUDE="-I /usr/share/$GUESS_QTDIR/include";
+    fi
+    if [ -d /usr/lib/$GUESS_QTDIR/lib ]; then
+      QT_LIB="-L /usr/lib/$GUESS_QTDIR/lib -lqt-mt";
+    fi
+    if [ -d /usr/share/$GUESS_QTDIR/lib ]; then
+      QT_LIB="-L /usr/share/$GUESS_QTDIR/lib -lqt-mt";
+    fi
+
+    UIC="/usr/lib/$GUESS_QTDIR/bin/uic";
+    MOC="/usr/lib/$GUESS_QTDIR/bin/moc";
+  done ;
+fi
+
+if [ ! "$QT_INCLUDE" ] || [ ! "$QT_LIB" ] || [ ! "$UIC" ] || [ ! "$MOC" ]; then
+	echo -e "\n\n*** Qt 3.x not found. Please manually set QT_INCLUDE, QT_LIB, UIC, MOC!\n\a"
+	echo -e "\tQT_INCLUDE: $QT_INCLUDE" 
+	echo -e "\tQT_LIB: $QT_LIB" 
+	echo -e "\tMOC: $MOC" 
+	echo -e "\tUIC: $UIC"
+	echo "" 
+	exit 1
+else
+	echo "Ok" ;
+fi
+	echo -e "\tQT_INCLUDE: $QT_INCLUDE" 
+	echo -e "\tQT_LIB: $QT_LIB" 
+	echo -e "\tMOC: $MOC" 
+	echo -e "\tUIC: $UIC"
+	echo "" 
+fi
+
+#### GSL
+echo -n "Checking for Gsl libs "
+if [ "$OSTYPE" = "LINUX" ]; then
+	GSL_LIB="-lgsl -lgslcblas"
+	GSL_INCLUDE="-I/usr/include/"
+fi
+if [ "$OSTYPE" = "MACOSX" ]; then
+	GSL_LIB="-L/sw/lib -lgsl -lgslcblas"
+	GSL_INCLUDE="-I/sw/include"
+fi
+
+if [ ! "$GSL_INCLUDE" ]; then
+	echo -e "\n\n*** GSL not found, please set GSL_INCLUDE and GSL_LIB by hand\n\a"
+else
+	echo "Ok" ;
+fi
+
+
+# echo -n "Checking for KDE 3.x includes ... "
+# for GUESS_KDE_INCLUDE in /usr/include/kde /usr/include/kde3 /opt/kde3/include /opt/kde/include; do
+# 	if [ -d $GUESS_KDE_INCLUDE ]; then
+# 		KDE_INCLUDE="-I$GUESS_KDE_INCLUDE"
+# 	fi ;
+# done ;
+# 
+# if [ ! "$KDE_INCLUDE" ]; then
+# 	echo -e "\n\n*** KDE 3.x includes not found please set KDE_INCLUDE by hand\n\a"
+# 	exit 1
+# else
+# 	echo "Ok" ;
+# fi
+# 
+# echo -n "Checking for KDE 3.x libs ... "
+# for GUESS_KDE_LIB in /usr/lib/kde3 /opt/kde3/lib; do
+# 	if [ -d $GUESS_KDE_LIB ]; then
+# 		KDE_LIB="-L$GUESS_KDE_LIB -lkdeui"
+# 	fi ;
+# done ;
+# 
+# if [ ! "$KDE_LIB" ]; then
+# 	echo -e "\n\n*** KDE 3.x libs not found please set KDE_LIBS by hand\n\a"
+# 	exit 1
+# else
+# 	echo "Ok" ;
+# fi
+
+
+# echo -n "Checking for uic ... "
+# for GUESS_UIC in `ls /usr/bin/ | grep -E "uic|uic3"`; do
+# 	if [ -f /usr/bin/$GUESS_UIC ]; then
+# 		UIC=$GUESS_UIC;
+# 	fi ;
+# done ;
+# 
+# if [ ! "$UIC" ]; then
+# 	echo -e "\n\n*** uic  not found please set UIC by hand\n\a"
+# 	exit 1
+# else
+# 	echo "Ok" ;
+# fi
+
+MAPPING_ROOT=`pwd`
+
+
+BINDIR=$MAPPING_ROOT/bin
+echo -n "Checking bin directory $BINDIR ... "
+if [ ! -d $BINDIR ]; then
+	mkdir $BINDIR
+	echo "created."
+else
+	echo "Ok."
+fi
+
+LIBDIR=$MAPPING_ROOT/lib
+echo -n "Checking lib directory $LIBDIR ... "
+if [ ! -d $LIBDIR ]; then
+	mkdir $LIBDIR
+	echo "created."
+else
+	echo "Ok."
+fi
+
+CGALSUPPORT=0
+if [ -z "$CGAL_MAKEFILE" ]; then
+  echo -e "CGAL NOT FOUND."
+  echo -e "If you have a cgal version installed please set the"
+  echo -e "CGAL_MAKEFILE variable to the cgal_makefile."
+else
+  CGALSUPPORT=1
+  echo -e "Enabling CGAL support"
+fi
+
+#SURFACEMAP_LIB=
+#SURFACEMAP_INCLUDE=
+#SURFACEMAPSUPPORT=0
+#if [ -z "$SURFACE_MAPS_HOME" ]; then
+#  echo -e "Surface Map Library not found"
+#  echo -e "Please define SURFACE_MAPS_HOME if you have projects-surface_maps"
+#else
+#  SURFACEMAPSUPPORT=1
+#  SURFACEMAP_LIB=$SURFACE_MAPS_HOME/lib
+#  SURFACEMAP_INCLUDE=$SURFACE_MAPS_HOME/include
+#  echo -e "Enabling Surface Maps support"
+#fi
+
+
+CONFIG=global.mk
+rm -f $CONFIG
+
+cat << EOF > $CONFIG
+### You should not need to change anything below.
+LINUX=$LINUX
+MACOSX=$MACOSX
+
+# Compilers
+CC=$CC
+CXX=$CXX
+
+# Paths
+MAPPING_ROOT=$MAPPING_ROOT
+LIBDIR=$LIBDIR
+BINDIR=$BINDIR
+
+# Build tools
+PRETTY=$MAPPING_ROOT/build_tools/pretty_compiler
+MESSAGE=$MAPPING_ROOT/build_tools/message
+TESTLIB=$MAPPING_ROOT/build_tools/testlib
+
+# QT support
+MOC=$MOC
+UIC=$UIC
+QT_LIB=$QT_LIB
+QT_INCLUDE=$QT_INCLUDE
+
+
+# # KDE support
+# KDE_LIB=$KDE_LIB
+# KDE_INCLUDE=$KDE_INCLUDE
+# UIC=$UIC
+
+# Generic makefiles
+MAKEFILE_GENERIC=$MAPPING_ROOT/build_tools/Makefile.generic-shared-object
+MAKEFILE_APP=$MAPPING_ROOT/build_tools/Makefile.app
+MAKEFILE_SUBDIRS=$MAPPING_ROOT/build_tools/Makefile.subdirs
+
+
+# Flags
+CPPFLAGS+=$CPPFLAGS -I$MAPPING_ROOT $CARMENFLAG 
+CFLAGS+=$CFLAGS
+CXXFLAGS+=$CXXFLAGS
+LDFLAGS+=$LDFLAGS
+CARMENSUPPORT=$CARMENSUPPORT
+
+# CGAL Support
+CGALSUPPORT=$CGALSUPPORT
+
+# Surface Maps Support
+#SURFACEMAPSUPPORT=$SURFACEMAPSUPPORT
+#SURFACEMAP_LIB=-L$SURFACEMAP_LIB
+#SURFACEMAP_INCLUDE=-I$SURFACEMAP_INCLUDE
+
+GSL_LIB=$GSL_LIB
+GSL_INCLUDE=$GSL_INCLUDE
+
+CARMEN_INCLUDE=$CARMEN_INCLUDE
+
+$OTHER
+
+include $MAPPING_ROOT/manual.mk
+
+EOF
+

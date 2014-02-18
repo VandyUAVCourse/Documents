@@ -1,0 +1,3 @@
+#!/bin/bash
+rm Makefile.generic-shared-object
+ln -s Makefile.generic-shared-object-test Makefile.generic-shared-object
