@@ -8,18 +8,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <time.h>
-#if (defined __QNX__) | (defined __QNXNTO__)
-/* QNX specific headers */
-#include <unix.h>
-#else
-/* Linux / MacOS POSIX timer headers */
 #include <sys/time.h>
 #include <time.h>
 #include <arpa/inet.h>
-#endif
-
-/* This assumes you have the mavlink headers on your include path
- or in the same folder as this source file */
 #include <mavlink.h>
 #include <iostream>
 #include <SerialStream.h>
@@ -35,22 +26,29 @@ int main(int argc, char* argv[]) {
        
   uint8_t buf[BUFFER_LENGTH];
   mavlink_message_t msg;
-  uint16_t len;
+  uint16_t len;  
+  char next_byte;
+  mavlink_status_t status;
+
 
   if(argc < 2) { 
     std::cerr << "Must pass in a valid USB port file name [e.g. /dev/ttyS0]" << std::endl;
     return 1;
   }
 
-  char* SERIAL_PORT_DEVICE;
+  const char* const SERIAL_PORT_DEVICE = "/dev/ttyACM1";
+  std::cout << "serial port name initialized" << std::endl;
   
-      
+  /*
   // Set the serial port device
   if (argc == 2) {
     strcpy(SERIAL_PORT_DEVICE, argv[1]);
-  }
-  	
+    }*/
+  std::cout << "SERIAL PORT: " << SERIAL_PORT_DEVICE << std::endl;
+  
   SerialStream serial_port;
+  std::cout << "port initialized" << std::endl;
+
   serial_port.Open(SERIAL_PORT_DEVICE);
   if(!serial_port.good()) {
     std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -59,15 +57,17 @@ int main(int argc, char* argv[]) {
 	      << std::endl;
     exit(1);
   }
+  std::cout << "Opened..." << std::endl;
 
-  serial_port.SetBaudRate(SerialStreamBuf::BAUD_115200);
+  serial_port.SetBaudRate(SerialStreamBuf::BAUD_9600);
   if(!serial_port.good()) {
     std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-	      << "Error: Could not set Baud Rate (11520): "
+	      << "Error: Could not set Baud Rate (115200): "
 	      << SERIAL_PORT_DEVICE
 	      << std::endl;
     exit(1);
   }
+  std::cout << "Baud set..." << std::endl;
 
   serial_port.SetCharSize(SerialStreamBuf::CHAR_SIZE_8); 
   if(!serial_port.good()) {
@@ -77,6 +77,7 @@ int main(int argc, char* argv[]) {
 	      << std::endl;
     exit(1);
   }
+  std::cout << "Char size set..." << std::endl;
 
   serial_port.SetParity(SerialStreamBuf::PARITY_NONE);
   if(!serial_port.good()) {
@@ -86,6 +87,7 @@ int main(int argc, char* argv[]) {
 	      << std::endl;
     exit(1);
   }
+  std::cout << "Parity set..." << std::endl;
 	
   serial_port.SetNumOfStopBits(1);
   if(!serial_port.good()) {
@@ -95,6 +97,7 @@ int main(int argc, char* argv[]) {
 	      << std::endl;
     exit(1);
   }
+  std::cout << "Stop bits set..." << std::endl;
 
   serial_port.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_NONE);
   if(!serial_port.good()) {
@@ -104,7 +107,8 @@ int main(int argc, char* argv[]) {
 	      << std::endl;
     exit(1);
   }
-
+  std::cout << "Flow control set..." << std::endl;
+  std::cout << "----Setup complete----" << std::endl;
 	
   while(1) {
 		
@@ -113,29 +117,26 @@ int main(int argc, char* argv[]) {
 			       MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
 			       0, MAV_STATE_ACTIVE);
     len = mavlink_msg_to_send_buffer(buf, &msg);
-    serial_port.write((char*)buf, len);    
-		
+    serial_port << buf;    
+    
+    while(serial_port.rdbuf()->in_avail() > 0) {
+      serial_port.get(next_byte);
+      std::cout << std::hex << (uint8_t)next_byte << std::endl;
+      
+      if(mavlink_parse_char(MAVLINK_COMM_0, (uint8_t) next_byte,
+			    &msg, &status)) {
+
+	printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
+	       msg.sysid, msg.compid, msg.len, msg.msgid);
+      }
+    }
+    printf("\n");
+
     memset(buf, 0, BUFFER_LENGTH);
-    sleep(5);
+    sleep(1);
   }
 }
 
-
-/* QNX timer version */
-#if (defined __QNX__) | (defined __QNXNTO__)
-uint64_t microsSinceEpoch() {
-	
-  struct timespec time;
-	
-  uint64_t micros = 0;
-	
-  clock_gettime(CLOCK_REALTIME, &time);  
-  micros = (uint64_t)time.tv_sec * 100000 + time.tv_nsec/1000;
-	
-  return micros;
-}
-
-#else
 uint64_t microsSinceEpoch() {
 	
   struct timeval tv;
@@ -147,4 +148,3 @@ uint64_t microsSinceEpoch() {
 	
   return micros;
 }
-#endif

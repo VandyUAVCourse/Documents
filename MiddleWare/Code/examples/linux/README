@@ -1,0 +1,10 @@
+TO COMPILE [mavlink_serial.cpp]:
+
+g++ -I ../../mavlink/include/mavlink/v1.0/common/ -o mavserial mavlink_serial.cpp -lserial
+
+
+[-I ...] includes the necessary mavlink headers
+
+[-lserial] links libserial for easy comms
+
+other examples can be built using similar compile lines!
