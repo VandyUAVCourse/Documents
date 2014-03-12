@@ -160,23 +160,23 @@ int main(int argc, char* argv[])
 		recsize = recvfrom(sock, (void *)buf, BUFFER_LENGTH, 0, (struct sockaddr *)&gcAddr, &fromlen);
 		if (recsize > 0)
       	{
-			// Something received - print out all bytes and parse packet
-			mavlink_message_t msg;
-			mavlink_status_t status;
+	  // Something received - print out all bytes and parse packet
+	  mavlink_message_t msg;
+	  mavlink_status_t status;
 			
-			printf("Bytes Received: %d\nDatagram: ", (int)recsize);
-			for (i = 0; i < recsize; ++i)
-			{
-				temp = buf[i];
-				printf("%02x ", (unsigned char)temp);
-				if (mavlink_parse_char(MAVLINK_COMM_0, buf[i], &msg, &status))
-				{
-					// Packet received
-					printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSG ID: %d\n", msg.sysid, msg.compid, msg.len, msg.msgid);
-				}
-			}
-			printf("\n");
+	  printf("Bytes Received: %d\nDatagram: ", (int)recsize);
+	  for (i = 0; i < recsize; ++i)
+	    {
+	      temp = buf[i];
+	      printf("%02x ", (unsigned char)temp);
+	      if (mavlink_parse_char(MAVLINK_COMM_0, buf[i], &msg, &status))
+		{
+		  // Packet received
+		  printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSG ID: %d\n", msg.sysid, msg.compid, msg.len, msg.msgid);
 		}
+	    }
+	  printf("\n");
+	}
 		memset(buf, 0, BUFFER_LENGTH);
 		sleep(1); // Sleep one second
     }

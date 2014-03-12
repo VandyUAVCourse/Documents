@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <mavlink.h>
 #include <iostream>
+#include <iomanip>
 #include <SerialStream.h>
 #include <fstream>
 
@@ -30,20 +31,14 @@ int main(int argc, char* argv[]) {
   char next_byte;
   mavlink_status_t status;
 
-
-  if(argc < 2) { 
-    std::cerr << "Must pass in a valid USB port file name [e.g. /dev/ttyS0]" << std::endl;
-    return 1;
-  }
-
-  const char* const SERIAL_PORT_DEVICE = "/dev/ttyACM1";
+  char* SERIAL_PORT_DEVICE = "/dev/ttyACM1";
   std::cout << "serial port name initialized" << std::endl;
   
-  /*
+  
   // Set the serial port device
   if (argc == 2) {
     strcpy(SERIAL_PORT_DEVICE, argv[1]);
-    }*/
+  }
   std::cout << "SERIAL PORT: " << SERIAL_PORT_DEVICE << std::endl;
   
   SerialStream serial_port;
@@ -109,7 +104,8 @@ int main(int argc, char* argv[]) {
   }
   std::cout << "Flow control set..." << std::endl;
   std::cout << "----Setup complete----" << std::endl;
-	
+
+  int msg_send_num = 0;
   while(1) {
 		
     /*Send Heartbeat */
@@ -117,21 +113,42 @@ int main(int argc, char* argv[]) {
 			       MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
 			       0, MAV_STATE_ACTIVE);
     len = mavlink_msg_to_send_buffer(buf, &msg);
-    serial_port << buf;    
+    serial_port.write((char*)&buf, len);
+    std::cout << "len: " << len << std::endl;
     
-    while(serial_port.rdbuf()->in_avail() > 0) {
-      serial_port.get(next_byte);
-      std::cout << std::hex << (uint8_t)next_byte << std::endl;
-      
-      if(mavlink_parse_char(MAVLINK_COMM_0, (uint8_t) next_byte,
-			    &msg, &status)) {
+    std::cout << "SEND: ";
+    char temp;    
+    for(int i = 0; i < len; ++i) {
+      temp = buf[i];
+      printf("%02x", (unsigned char)temp);
+    }
+    std::cout << std::endl;
+
+    memset(buf, 0, BUFFER_LENGTH);
+
+    int i = 0;
+    if(serial_port.rdbuf()->in_avail() > 0) {
+      while(serial_port.rdbuf()->in_avail() > 0) {
+	serial_port.get(next_byte);
+	buf[i] = (uint8_t)next_byte;
+	++i;
+      }
+    }
+    
+    std::cout << "RECV: ";
+    for(int j = 0; j < i; ++j) {
+      temp = buf[j];
+      printf("%02x", (unsigned char)temp);
+
+      if(mavlink_parse_char(MAVLINK_COMM_0, buf[j], &msg, &status)) {
 
 	printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
 	       msg.sysid, msg.compid, msg.len, msg.msgid);
       }
     }
-    printf("\n");
-
+    
+    std::cout << std::endl;
+    
     memset(buf, 0, BUFFER_LENGTH);
     sleep(1);
   }
