@@ -1,10 +1,19 @@
-TO COMPILE [mavlink_serial.cpp]:
+A more detailed version of this quickstart is available at:
 
-g++ -I ../../mavlink/include/mavlink/v1.0/common/ -o mavserial mavlink_serial.cpp -lserial
+http://qgroundcontrol.org/dev/mavlink_linux_integration_tutorial
+
+MAVLINK UDP QUICKSTART INSTRUCTIONS
+===================================
+
+MAVLink UDP Example for *nix system (Linux, MacOS, BSD, etc.)
+
+To compile with GCC, just enter:
+
+gcc -I ../../include/common -o mavlink_udp mavlink_udp.c
+
+To run, type:
+
+./mavlink_udp
 
 
-[-I ...] includes the necessary mavlink headers
-
-[-lserial] links libserial for easy comms
-
-other examples can be built using similar compile lines!
+If you run QGroundControl on the same machine, a MAV should pop up.

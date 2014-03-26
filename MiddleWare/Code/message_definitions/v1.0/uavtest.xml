@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<mavlink>
+	<version>3</version>
+	<enums>
+	</enums>
+	<messages>
+		<message id="150" name="THERMAL_SENSOR_1">
+			<description>This message encodes all of the raw thermal sensor data.</description>
+			<field type="uint16_t" name="temperature">Temperature reading from the thermal sensor.</field>
+		</message>
+	</messages>
+</mavlink>
+
