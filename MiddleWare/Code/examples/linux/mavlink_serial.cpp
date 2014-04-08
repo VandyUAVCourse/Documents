@@ -11,11 +11,12 @@
 #include <sys/time.h>
 #include <time.h>
 #include <arpa/inet.h>
-#include <mavlink.h>
 #include <iostream>
 #include <iomanip>
 #include <SerialStream.h>
 #include <fstream>
+#include <mavlink.h>
+
 
 #define BUFFER_LENGTH 2041
 
@@ -31,7 +32,7 @@ int main(int argc, char* argv[]) {
   char next_byte;
   mavlink_status_t status;
 
-  char* SERIAL_PORT_DEVICE = "/dev/ttyACM1";
+  char* SERIAL_PORT_DEVICE = "/dev/ttyACM0";
   std::cout << "serial port name initialized" << std::endl;
   
   
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
     strcpy(SERIAL_PORT_DEVICE, argv[1]);
   }
   std::cout << "SERIAL PORT: " << SERIAL_PORT_DEVICE << std::endl;
-  
+ // terminal close file
   SerialStream serial_port;
   std::cout << "port initialized" << std::endl;
 
@@ -109,9 +110,8 @@ int main(int argc, char* argv[]) {
   while(1) {
 		
     /*Send Heartbeat */
-    mavlink_msg_heartbeat_pack(1, 200, &msg, MAV_TYPE_HELICOPTER, 
-			       MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
-			       0, MAV_STATE_ACTIVE);
+    mavlink_msg_thermal_sensor_1_pack(1, 150, &msg, 30);
+
     len = mavlink_msg_to_send_buffer(buf, &msg);
     serial_port.write((char*)&buf, len);
     std::cout << "len: " << len << std::endl;
