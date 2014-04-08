@@ -77,7 +77,7 @@ public:
 		normPub.publish(norm);
 	}
 
-	void setupLaserScan(sensor_msgs::LaserScan reading,
+	void setupLaserScan(const sensor_msgs::LaserScan& reading,
 				sensor_msgs::LaserScan& msg, 
 				std::string frame_id, 
 				double angle_min, 
