@@ -4,7 +4,7 @@
 
 #include "kalman_filters/kalman_filters.h"
 #include "ros/ros.h"
-#include "state_ukf/pose_ukf_msg.h"
+#include "kalman_filters/pose_ukf_msg.h"
 #include "geometry_msgs/Twist.h"
 
 using namespace kalman_filters;
@@ -16,9 +16,9 @@ int main(int argc, char* argv[]) {
     
     ros::Publisher imuPub = n.advertise<geometry_msgs::Twist>("imu_data", 1000);
     ros::Publisher slamPub = 
-                        n.advertise<state_ukf::pose_ukf_msg>("slam_data", 1000);
+                        n.advertise<kalman_filters::pose_ukf_msg>("slam_data", 1000);
     ros::Publisher posePub = 
-                    n.advertise<state_ukf::pose_ukf_msg>("pose_est_data", 1000);
+                    n.advertise<kalman_filters::pose_ukf_msg>("pose_est_data", 1000);
     
     ros::Rate loop_rate(100);
     
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
         imuPub.publish(imuMsg);
         
         if ((i % 5) == 0) {
-            state_ukf::pose_ukf_msg msg;
+            kalman_filters::pose_ukf_msg msg;
             msg.x += 1.0;
             msg.y += 1.0;
             msg.z += 1.0;
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         }
         
         if ((i % 10) == 0) {
-            static state_ukf::pose_ukf_msg msg;
+            static kalman_filters::pose_ukf_msg msg;
             msg.x += 1.0;
             msg.y += 1.0;
             msg.z += 1.0;

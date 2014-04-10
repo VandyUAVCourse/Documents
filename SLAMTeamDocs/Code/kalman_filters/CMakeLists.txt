@@ -116,12 +116,9 @@ add_executable(test_node src/test_node.cpp src/math_functions.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(state_ukf_node state_ukf_generate_messages_cpp
-                 pose_ukf_generate_messages_cpp)
-add_dependencies(pose_ukf_node pose_ukf_generate_messages_cpp
-                 state_ukf_generate_messages_cpp)
-add_dependencies(test_node pose_ukf_generate_messages_cpp
-                 state_ukf_generate_messages_cpp)               
+add_dependencies(state_ukf_node kalman_filters_generate_messages_cpp)
+add_dependencies(pose_ukf_node kalman_filters_generate_messages_cpp)
+add_dependencies(test_node kalman_filters_generate_messages_cpp)               
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(state_ukf_node

@@ -1,4 +1,4 @@
-#include "kalman_filters/kalman_filters.h"
+#include "kalman_filters/pose_ukf_node.h"
 #include <eigen3/Eigen/Cholesky>
 
 namespace kalman_filters {
@@ -59,7 +59,7 @@ PoseUKF::PoseUKF() {
     mAvailableControl = mAvailableMeasurement = false;
     
     // Create the state publisher
-    mPub = mN.advertise<state_ukf::pose_ukf_msg>("pose_ukf", 1000);
+    mPub = mN.advertise<kalman_filters::pose_ukf_msg>("pose_ukf", 1000);
     
     // Create the subscribers to the IMU data nd the pose estimate UKF data
     mPoseSub = mN.subscribe("pose_est_data", 1,
@@ -112,7 +112,7 @@ void PoseUKF::main_loop(const ros::TimerEvent& e) {
         mAvailableMeasurement = false;
     }
     
-    state_ukf::pose_ukf_msg msg;
+    kalman_filters::pose_ukf_msg msg;
     
     const Vector6d& state = *mStateBuffer.back();
     
@@ -130,7 +130,7 @@ void PoseUKF::main_loop(const ros::TimerEvent& e) {
 /**
  * Receiver for data from the IMU.
  */
-void PoseUKF::pose_est_receiver(const state_ukf::pose_ukf_msgConstPtr& msg) {
+void PoseUKF::pose_est_receiver(const kalman_filters::pose_ukf_msgConstPtr& msg) {
     
     boost::shared_ptr<Vector6d> control(new Vector6d);
     *control << msg->x, msg->y, msg->z, msg->roll, msg->pitch, msg->yaw;
@@ -143,7 +143,7 @@ void PoseUKF::pose_est_receiver(const state_ukf::pose_ukf_msgConstPtr& msg) {
 /**
  * Receiver for data from the pose estimate UKF.
  */
-void PoseUKF::slam_receiver(const state_ukf::pose_ukf_msgConstPtr& msg) {
+void PoseUKF::slam_receiver(const kalman_filters::pose_ukf_msgConstPtr& msg) {
     mMeasurement << msg->x, msg->y, msg->z, msg->roll, msg->pitch, msg->yaw;
     
     mAvailableMeasurement = true;
@@ -267,7 +267,7 @@ void PoseUKF::measurementUpdatePose() {
 int main(int argc, char* argv[]) {
     // Initialize ros
     ros::init(argc, argv, "pose_ukf_node");
-    state_ukf::PoseUKF ukf;
+    kalman_filters::PoseUKF ukf;
     
     // Run node
     ros::spin();

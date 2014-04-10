@@ -34,12 +34,12 @@ private:
     /**
      * Receiver for data from the pose estimator.
      */
-    void pose_est_receiver(const state_ukf::pose_ukf_msgConstPtr& msg);
+    void pose_est_receiver(const kalman_filters::pose_ukf_msgConstPtr& msg);
 
     /**
      * Receiver for data from SLAM.
      */
-    void slam_receiver(const state_ukf::pose_ukf_msgConstPtr& msg);
+    void slam_receiver(const kalman_filters::pose_ukf_msgConstPtr& msg);
                      
     
     /**
