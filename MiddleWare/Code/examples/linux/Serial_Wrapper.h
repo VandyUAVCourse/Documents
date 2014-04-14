@@ -24,7 +24,7 @@ template<int BUFFER_SIZE>
 class Serial_Wrapper {
     public:
         //Constructor
-        //@param serial_port_device The name of the serial port
+        //@param serialPortDevice The name of the serial port
         //@param buad The baud rate of the serial port
         //@param charsize The character size to send over the serial port
         //@param parity The number of parity bits to set
@@ -34,7 +34,7 @@ class Serial_Wrapper {
         //
         //  @ Description:
         //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
-        Serial_Wrapper (string serial_port_device, 
+        Serial_Wrapper (const char* serialPortDevice, 
                         LibSerial::SerialStreamBuf::BaudRateEnum baud = LibSerial::SerialStreamBuf::BAUD_9600,
                         LibSerial::SerialStreamBuf::CharSizeEnum charsize = CHAR_SIZE_8,
                         LibSerial::SerialStreamBuf::ParityEnum parity = LibSerial::SerialStreamBuf::PARITY_NONE,
@@ -72,8 +72,6 @@ class Serial_Wrapper {
         std::Array get(int size);
 
         // size
-        // @ Params:
-        // none
         //
         // @ Description
         // Returns the number of bytes available to read off of the FIFO buffer
@@ -86,9 +84,11 @@ class Serial_Wrapper {
         ~Serial_Wrapper();
 
         private:
-            std::queue <uint8_t> rcv_buffer;
+            std::queue <uint8_t> _rcvBuffer;
 
-            SerialStream serial_port;
+            SerialStream _serialPort;
 };
+
+#include "Serial_Wrapper.h"
 
 #endif
