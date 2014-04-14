@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   char next_byte;
   mavlink_status_t status;
 
-  char* SERIAL_PORT_DEVICE = "/dev/ttyACM0";
+  char* SERIAL_PORT_DEVICE = "/dev/ttyUSB0";
   std::cout << "serial port name initialized" << std::endl;
   
   
@@ -110,7 +110,9 @@ int main(int argc, char* argv[]) {
   while(1) {
 		
     /*Send Heartbeat */
-    mavlink_msg_thermal_sensor_1_pack(1, 150, &msg, 30);
+    mavlink_msg_heartbeat_pack(1, 200, &msg, MAV_TYPE_HELICOPTER,
+		MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
+		0, MAV_STATE_ACTIVE);
 
     len = mavlink_msg_to_send_buffer(buf, &msg);
     serial_port.write((char*)&buf, len);
