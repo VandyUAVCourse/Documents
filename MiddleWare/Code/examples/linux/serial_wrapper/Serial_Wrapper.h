@@ -19,6 +19,8 @@
 #include <iomanip>
 #include <SerialStream.h>
 #include <fstream>
+#include <array>
+#include <queue>
 
 template<int BUFFER_SIZE>
 class Serial_Wrapper {
@@ -36,7 +38,7 @@ class Serial_Wrapper {
         //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
         Serial_Wrapper (const char* serialPortDevice, 
                         LibSerial::SerialStreamBuf::BaudRateEnum baud = LibSerial::SerialStreamBuf::BAUD_9600,
-                        LibSerial::SerialStreamBuf::CharSizeEnum charsize = CHAR_SIZE_8,
+                        LibSerial::SerialStreamBuf::CharSizeEnum charsize = LibSerial::SerialStreamBuf::CHAR_SIZE_8,
                         LibSerial::SerialStreamBuf::ParityEnum parity = LibSerial::SerialStreamBuf::PARITY_NONE,
                         int stopbits = 1,
                         LibSerial::SerialStreamBuf::FlowControlEnum flow_control = LibSerial::SerialStreamBuf::FLOW_CONTROL_NONE);
@@ -69,7 +71,7 @@ class Serial_Wrapper {
         // @ Throws
         // Throws an exception TODO: What exception?
         // if more bytes are requested than are available
-        std::Array get(int size);
+	std::array <uint8_t, BUFFER_SIZE> get();
 
         // size
         //
@@ -84,9 +86,9 @@ class Serial_Wrapper {
         ~Serial_Wrapper();
 
         private:
-            std::queue <uint8_t> _rcvBuffer;
+            std::queue <uint8_t> rcvBuffer_;
 
-            SerialStream _serialPort;
+            LibSerial::SerialStream serialPort_;
 };
 
 #include "Serial_Wrapper.h"

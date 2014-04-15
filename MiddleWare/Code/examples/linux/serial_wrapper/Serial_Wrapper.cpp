@@ -18,13 +18,13 @@ Serial_Wrapper::Serial_Wrapper (const char* serialPortDevice,
                                 LibSerial::SerialStreamBuf::FlowControlEnum flow_control = LibSerial::SerialStreamBuf::FLOW_CONTROL_NONE)
     // Default Initializers are OK 
 {
-    _serialPort.Open(serialPortDevice);
-    _serialPort.SetBaudRate(baud);
-    _serialPort.SetCharSize(charsize);
-    _serialPort.SetParity(parity);
-    _serialPort.SetNumOfStopBits(stopbits);
-    _serialPort.SetFlowControl(flow_control);
-    if(!_serialPort.good()) 
+    serialPort_.Open(serialPortDevice);
+    serialPort_.SetBaudRate(baud);
+    serialPort_.SetCharSize(charsize);
+    serialPort_.SetParity(parity);
+    serialPort_.SetNumOfStopBits(stopbits);
+    serialPort_.SetFlowControl(flow_control);
+    if(!serialPort_.good()) 
         throw std::runtime_error ("Serial_Wrapper::Serial_Wrapper Could not initialize " + serialPortDevice);
 }
 
@@ -40,7 +40,7 @@ Serial_Wrapper::Serial_Wrapper (const char* serialPortDevice,
 template<int MESSAGE_SIZE>
 void Serial_Wrapper::send ( uint16_t len, uint8_t &buf[MESSAGE_SIZE])
 {
-    _serialPort.write((char*)&buf, len);
+    serialPort_.write((char*)&buf, len);
 }
 
 // read
@@ -52,10 +52,10 @@ int Serial_Wrapper::read ()
 {
     int bytesRcvd(0);
     char next_byte(0);
-    if (_serialPort.rdbuff()->in_avail() > 0) {
-        while (_serialPort.rdbuf()->in_avail() > 0) {
-            _serialPort.get(next_byte);
-            _rcvBuffer.push( (uint8_t) next_byte);
+    if (serialPort_.rdbuff()->in_avail() > 0) {
+        while (serialPort_.rdbuf()->in_avail() > 0) {
+            serialPort_.get(next_byte);
+            rcvBuffer_.push( (uint8_t) next_byte);
             ++bytesRcvd;
         }
     }
@@ -73,7 +73,7 @@ int Serial_Wrapper::read ()
 // Throws an exception TODO: What exception?
 // if more bytes are requested than are available
 template <int MESSAGE_SIZE>
-std::Array <uint8_t, MESSAGE_SIZE> Serial_Wrapper::get ()
+std::array <uint8_t, MESSAGE_SIZE> Serial_Wrapper::get ()
 {
     if (size < MESSAGE_SIZE)
         throw std::underflow_error("Serial_Wrapper::get () Not enough bytes in queue to pack a message");
@@ -81,8 +81,8 @@ std::Array <uint8_t, MESSAGE_SIZE> Serial_Wrapper::get ()
     std::Array <uint8_t, MESSAGE_SIZE> array;
 
     for ( auto& elem : array) {
-        elem = _rcvBuffer.front();
-        _rcvBuffer.pop();
+        elem = rcvBuffer_.front();
+        rcvBuffer_.pop();
     }
 
     return array;
@@ -96,7 +96,7 @@ std::Array <uint8_t, MESSAGE_SIZE> Serial_Wrapper::get ()
 // Returns the number of bytes available to read off of the FIFO buffer
 int size ()
 {
-    return _rcvBuffer.size();
+    return rcvBuffer_.size();
 }
 
 // Destructor
@@ -105,7 +105,7 @@ int size ()
 // Closes the serial port.
 ~Serial_Wrapper()
 {
-   _serialPort.Close(); 
+   serialPort_.Close(); 
 }
 
 
