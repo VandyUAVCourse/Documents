@@ -3,6 +3,9 @@
 
 #include "Serial_Wrapper.h"
 
+//TODO: RM DEBUG
+#include <iostream>
+
 #define MAV_MESSAGE_SIZE 17
 
 int main (int argc, char** argv) {
@@ -24,6 +27,14 @@ int main (int argc, char** argv) {
 	sleep(1);
 
 	sw.read();
+
+	while(sw.size() < 17) {
+		sleep(1);
+		sw.send(len, sendbuf);
+		sw.read();
+		std::cout << "Test" << std::endl;
+	}
+
 	std::array <uint8_t, MAV_MESSAGE_SIZE> arr(sw.get());
 	if(mavlink_parse_char(MAVLINK_COMM_0, arr[0], &msg, &status)) {
 

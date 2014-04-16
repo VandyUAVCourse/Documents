@@ -36,7 +36,8 @@ class Serial_Wrapper {
         //
         //  @ Description:
         //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
-        Serial_Wrapper (const char* serialPortDevice, 
+        //Serial_Wrapper <int BUFFER_SIZE> (std::string serialPortDevice, 
+        Serial_Wrapper (std::string serialPortDevice, 
                         LibSerial::SerialStreamBuf::BaudRateEnum baud = LibSerial::SerialStreamBuf::BAUD_9600,
                         LibSerial::SerialStreamBuf::CharSizeEnum charsize = LibSerial::SerialStreamBuf::CHAR_SIZE_8,
                         LibSerial::SerialStreamBuf::ParityEnum parity = LibSerial::SerialStreamBuf::PARITY_NONE,
@@ -91,6 +92,6 @@ class Serial_Wrapper {
             LibSerial::SerialStream serialPort_;
 };
 
-#include "Serial_Wrapper.h"
+#include "Serial_Wrapper.cpp"
 
 #endif

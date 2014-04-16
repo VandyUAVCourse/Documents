@@ -10,12 +10,13 @@
         //
         //  @ Description:
         //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
-Serial_Wrapper::Serial_Wrapper (const char* serialPortDevice, 
-                                LibSerial::SerialStreamBuf::BaudRateEnum baud = LibSerial::SerialStreamBuf::BAUD_9600,
-                                LibSerial::SerialStreamBuf::CharSizeEnum charsize = CHAR_SIZE_8,
-                                LibSerial::SerialStreamBuf::ParityEnum parity = LibSerial::SerialStreamBuf::PARITY_NONE,
-                                int stopbits = 1,
-                                LibSerial::SerialStreamBuf::FlowControlEnum flow_control = LibSerial::SerialStreamBuf::FLOW_CONTROL_NONE)
+template<int BUFFER_SIZE>
+Serial_Wrapper<BUFFER_SIZE>::Serial_Wrapper (std::string serialPortDevice, 
+                                LibSerial::SerialStreamBuf::BaudRateEnum baud,
+                                LibSerial::SerialStreamBuf::CharSizeEnum charsize,
+                                LibSerial::SerialStreamBuf::ParityEnum parity,
+                                int stopbits,
+                                LibSerial::SerialStreamBuf::FlowControlEnum flow_control)
     // Default Initializers are OK 
 {
     serialPort_.Open(serialPortDevice);
@@ -37,8 +38,8 @@ Serial_Wrapper::Serial_Wrapper (const char* serialPortDevice,
 //
 // TODO: buf - should we templatize the length? How do we handle that?
 // TODO: Better to omit msg entirely? Probably yes, just send in the buffer
-template<int MESSAGE_SIZE>
-void Serial_Wrapper::send ( uint16_t len, uint8_t &buf[MESSAGE_SIZE])
+template<int BUFFER_SIZE>
+void Serial_Wrapper<BUFFER_SIZE>::send ( uint16_t len, uint8_t buf[BUFFER_SIZE])
 {
     serialPort_.write((char*)&buf, len);
 }
@@ -48,11 +49,12 @@ void Serial_Wrapper::send ( uint16_t len, uint8_t &buf[MESSAGE_SIZE])
 // @ Description
 // Reads all available data off of serial port into a buffer and returns the number of 
 // available bytes
-int Serial_Wrapper::read () 
+template <int BUFFER_SIZE>
+int Serial_Wrapper<BUFFER_SIZE>::read () 
 {
     int bytesRcvd(0);
     char next_byte(0);
-    if (serialPort_.rdbuff()->in_avail() > 0) {
+    if (serialPort_.rdbuf()->in_avail() > 0) {
         while (serialPort_.rdbuf()->in_avail() > 0) {
             serialPort_.get(next_byte);
             rcvBuffer_.push( (uint8_t) next_byte);
@@ -72,13 +74,13 @@ int Serial_Wrapper::read ()
 // @ Throws
 // Throws an exception TODO: What exception?
 // if more bytes are requested than are available
-template <int MESSAGE_SIZE>
-std::array <uint8_t, MESSAGE_SIZE> Serial_Wrapper::get ()
+template <int BUFFER_SIZE>
+std::array <uint8_t, BUFFER_SIZE> Serial_Wrapper<BUFFER_SIZE>::get ()
 {
-    if (size < MESSAGE_SIZE)
+    if (size () < BUFFER_SIZE)
         throw std::underflow_error("Serial_Wrapper::get () Not enough bytes in queue to pack a message");
 
-    std::Array <uint8_t, MESSAGE_SIZE> array;
+    std::array <uint8_t, BUFFER_SIZE> array;
 
     for ( auto& elem : array) {
         elem = rcvBuffer_.front();
@@ -94,7 +96,8 @@ std::array <uint8_t, MESSAGE_SIZE> Serial_Wrapper::get ()
 //
 // @ Description
 // Returns the number of bytes available to read off of the FIFO buffer
-int size ()
+template <int BUFFER_SIZE>
+int Serial_Wrapper<BUFFER_SIZE>::size ()
 {
     return rcvBuffer_.size();
 }
@@ -103,7 +106,8 @@ int size ()
 //
 // @ Description
 // Closes the serial port.
-~Serial_Wrapper()
+template <int BUFFER_SIZE>
+Serial_Wrapper<BUFFER_SIZE>::~Serial_Wrapper()
 {
    serialPort_.Close(); 
 }
