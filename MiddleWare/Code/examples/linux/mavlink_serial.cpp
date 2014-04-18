@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   char next_byte;
   mavlink_status_t status;
 
-  char* SERIAL_PORT_DEVICE = "/dev/ttyUSB0";
+  char* SERIAL_PORT_DEVICE = "/dev/ttyACM0";
   std::cout << "serial port name initialized" << std::endl;
   
   
