@@ -24,54 +24,34 @@ int main (int argc, char** argv) {
     len = mavlink_msg_to_send_buffer(sendbuf, &msg);
     sleep(1);
 
-    sw.send(len, sendbuf);
-    sw.send(len, sendbuf);
-    sw.send(len, sendbuf);
+    while(1) {
 
-    sleep(1);
+        std::cout << "SEND:" << std::endl;
+        for ( auto& elem : sendbuf) {
+            printf("%02x", (unsigned char)elem);
+        }
+        std::cout << std::endl;
 
-    sw.read();
-
-    while(sw.size() < 1) {
-        sleep(1);
         sw.send(len, sendbuf);
-        sw.read();
-        std::cout << "Test" << std::endl;
-    }
 
-    mavlink_msg_heartbeat_pack(1, 255, &msg, MAV_TYPE_HELICOPTER,
-            MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
-            0, MAV_STATE_ACTIVE);
-
-    len = mavlink_msg_to_send_buffer(sendbuf, &msg);
-
-    while(sw.size() < 1) {
         sleep(1);
-        sw.send(len, sendbuf);
         sw.read();
-        std::cout << "Test" << std::endl;
+
+        if (sw.size () > 0) {
+
+            std::array <uint8_t, MAV_MESSAGE_SIZE> arr(sw.get());
+
+            std::cout << "RECIEVE:" << std::endl;
+            for ( auto& elem : arr) {
+                printf("%02x", (unsigned char)elem);
+            }
+            std::cout << std::endl;
+
+            if(mavlink_parse_char(MAVLINK_COMM_0, arr[0], &msg, &status)) {
+                printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
+                        msg.sysid, msg.compid, msg.len, msg.msgid);
+            }
+        }
+
     }
-
-    std::array <uint8_t, MAV_MESSAGE_SIZE> arr(sw.get());
-
-    std::cout << "out of get" << std::endl;
-    for ( auto& elem : arr) {
-        printf("%02x", (unsigned char)elem);
-    }
-
-    if(mavlink_parse_char(MAVLINK_COMM_0, arr[0], &msg, &status)) {
-
-        printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
-                msg.sysid, msg.compid, msg.len, msg.msgid);
-    }
-
-    sleep(1);
-    sw.send(len, sendbuf);
-    std::cout << std::endl;
-
-    sleep(1);
-    sw.read();
-
-    printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
-            msg.sysid, msg.compid, msg.len, msg.msgid);
 }

@@ -12,7 +12,7 @@
 //
 //  @ Description:
 //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
-    template<int BUFFER_SIZE>
+template<int BUFFER_SIZE>
 Serial_Wrapper<BUFFER_SIZE>::Serial_Wrapper (std::string serialPortDevice, 
         LibSerial::SerialStreamBuf::BaudRateEnum baud,
         LibSerial::SerialStreamBuf::CharSizeEnum charsize,
@@ -38,15 +38,9 @@ Serial_Wrapper<BUFFER_SIZE>::Serial_Wrapper (std::string serialPortDevice,
 //
 // @description: Sends the message over the serial port
 //
-    template<int BUFFER_SIZE>
+template<int BUFFER_SIZE>
 void Serial_Wrapper<BUFFER_SIZE>::send ( uint16_t len, uint8_t* buf)
 {
-    std::cout << "in send" << std::endl;
-    char temp;
-    for(int i = 0; i < len; ++i) {
-        temp = buf[i];
-        printf("%02x", (unsigned char)temp);
-    }
     serialPort_.write((char*)buf, len);
 }
 
@@ -55,7 +49,7 @@ void Serial_Wrapper<BUFFER_SIZE>::send ( uint16_t len, uint8_t* buf)
 // @ Description
 // Reads all available data off of serial port into a buffer and returns the number of 
 // available bytes
-    template <int BUFFER_SIZE>
+template <int BUFFER_SIZE>
 int Serial_Wrapper<BUFFER_SIZE>::read () 
 {
     int bytesRcvd(0);
@@ -69,6 +63,8 @@ int Serial_Wrapper<BUFFER_SIZE>::read ()
             byte_buffer[bytesRcvd] = serialPort_.peek();
             serialPort_.get(trash);
             ++bytesRcvd;
+            // uncomment for proof that correct thing is recieved
+            //printf("%02x", (unsigned char)trash);
         }
         rcvBuffer_.push(byte_buffer);
     }
@@ -85,21 +81,24 @@ int Serial_Wrapper<BUFFER_SIZE>::read ()
 // @ Throws
 // Throws an exception TODO: What exception?
 // if more bytes are requested than are available
-    template <int BUFFER_SIZE>
+template <int BUFFER_SIZE>
 std::array <uint8_t, BUFFER_SIZE> Serial_Wrapper<BUFFER_SIZE>::get ()
 {
     if (size () < 1)
         throw std::underflow_error("Serial_Wrapper::get () Not enough bytes in queue to pack a message");
 
-    std::array <uint8_t, BUFFER_SIZE> array;
-    array.fill(0);
+    std::array <uint8_t, BUFFER_SIZE> arr;
 
-    char * getByteBuf =rcvBuffer_.front(); 
+    char * getByteBuf = rcvBuffer_.front(); 
 
     rcvBuffer_.pop();
-    std::cout << std::endl;
 
-    return array;
+    for (int i = 0; i < BUFFER_SIZE; ++i) {
+        printf("%02x", (unsigned char)getByteBuf[i]);
+        arr[i] = (uint8_t) getByteBuf[i];
+    }
+
+    return arr;
 }
 
 // size
@@ -108,7 +107,7 @@ std::array <uint8_t, BUFFER_SIZE> Serial_Wrapper<BUFFER_SIZE>::get ()
 //
 // @ Description
 // Returns the number of bytes available to read off of the FIFO buffer
-    template <int BUFFER_SIZE>
+template <int BUFFER_SIZE>
 int Serial_Wrapper<BUFFER_SIZE>::size ()
 {
     return rcvBuffer_.size();
@@ -118,7 +117,7 @@ int Serial_Wrapper<BUFFER_SIZE>::size ()
 //
 // @ Description
 // Closes the serial port.
-    template <int BUFFER_SIZE>
+template <int BUFFER_SIZE>
 Serial_Wrapper<BUFFER_SIZE>::~Serial_Wrapper()
 {
     serialPort_.Close(); 

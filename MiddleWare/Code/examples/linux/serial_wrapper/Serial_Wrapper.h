@@ -72,7 +72,7 @@ class Serial_Wrapper {
         // @ Throws
         // Throws an exception TODO: What exception?
         // if more bytes are requested than are available
-	std::array <uint8_t, BUFFER_SIZE> get();
+        std::array <uint8_t, BUFFER_SIZE> get();
 
         // size
         //
