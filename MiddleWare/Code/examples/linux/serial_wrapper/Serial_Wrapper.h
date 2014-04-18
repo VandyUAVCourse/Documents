@@ -87,7 +87,7 @@ class Serial_Wrapper {
         ~Serial_Wrapper();
 
         private:
-            std::queue <uint8_t> rcvBuffer_;
+            std::queue <char *> rcvBuffer_;
 
             LibSerial::SerialStream serialPort_;
 };
