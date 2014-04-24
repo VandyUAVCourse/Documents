@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   }
   std::cout << "Opened..." << std::endl;
 
-  serial_port.SetBaudRate(SerialStreamBuf::BAUD_9600);
+  serial_port.SetBaudRate(SerialStreamBuf::BAUD_115200);
   if(!serial_port.good()) {
     std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
 	      << "Error: Could not set Baud Rate (115200): "
