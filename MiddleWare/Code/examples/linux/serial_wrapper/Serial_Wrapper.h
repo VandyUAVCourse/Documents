@@ -22,7 +22,6 @@
 #include <array>
 #include <queue>
 
-template<int BUFFER_SIZE>
 class Serial_Wrapper {
     public:
         //Constructor
@@ -36,9 +35,8 @@ class Serial_Wrapper {
         //
         //  @ Description:
         //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
-        //Serial_Wrapper <int BUFFER_SIZE> (std::string serialPortDevice, 
         Serial_Wrapper (std::string serialPortDevice, 
-                        LibSerial::SerialStreamBuf::BaudRateEnum baud = LibSerial::SerialStreamBuf::BAUD_9600,
+                        LibSerial::SerialStreamBuf::BaudRateEnum baud = LibSerial::SerialStreamBuf::BAUD_115200,
                         LibSerial::SerialStreamBuf::CharSizeEnum charsize = LibSerial::SerialStreamBuf::CHAR_SIZE_8,
                         LibSerial::SerialStreamBuf::ParityEnum parity = LibSerial::SerialStreamBuf::PARITY_NONE,
                         int stopbits = 1,
@@ -50,10 +48,7 @@ class Serial_Wrapper {
         //@param  buf The buffer containing the message to send
         //
         // @description: Sends the message over the serial port
-        //
-        // TODO: buf - should we templatize the length? How do we handle that?
-        // TODO: Better to omit msg entirely? Probably yes, just send in the buffer
-        void send ( uint16_t len, uint8_t buf[BUFFER_SIZE]);
+        void send ( uint16_t len, uint8_t* buf);
 
         // read
         //
@@ -72,7 +67,7 @@ class Serial_Wrapper {
         // @ Throws
         // Throws an exception TODO: What exception?
         // if more bytes are requested than are available
-	std::array <uint8_t, BUFFER_SIZE> get();
+        uint8_t get();
 
         // size
         //

@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   char next_byte;
   mavlink_status_t status;
 
-  char* SERIAL_PORT_DEVICE = "/dev/ttyUSB0";
+  char* SERIAL_PORT_DEVICE = "/dev/ttyACM0";
   std::cout << "serial port name initialized" << std::endl;
   
   
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   }
   std::cout << "Opened..." << std::endl;
 
-  serial_port.SetBaudRate(SerialStreamBuf::BAUD_9600);
+  serial_port.SetBaudRate(SerialStreamBuf::BAUD_115200);
   if(!serial_port.good()) {
     std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
 	      << "Error: Could not set Baud Rate (115200): "

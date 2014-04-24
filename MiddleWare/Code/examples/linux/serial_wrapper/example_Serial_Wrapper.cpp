@@ -1,5 +1,5 @@
 #include <mavlink.h>
-#include <array>
+#include <vector>
 
 #include "Serial_Wrapper.h"
 
@@ -8,37 +8,73 @@
 
 #define MAV_MESSAGE_SIZE 17
 
+
 int main (int argc, char** argv) {
 
-	Serial_Wrapper <MAV_MESSAGE_SIZE> sw("/dev/ttyACM0");
+    Serial_Wrapper sw("/dev/ttyACM0");
 
-	uint8_t sendbuf[MAV_MESSAGE_SIZE];
-	mavlink_message_t msg;
-	uint16_t len;
-	mavlink_status_t status;
+    std::vector <uint8_t> rcvBuffer(70); //To store the contents of recieved message for debugging
+    uint16_t len;
+    int readBytes = 0;
 
-    mavlink_msg_heartbeat_pack(1, 200, &msg, MAV_TYPE_HELICOPTER,
-		MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
-		0, MAV_STATE_ACTIVE);
+    sleep(1);
 
-	len = mavlink_msg_to_send_buffer(sendbuf, &msg);
-	sw.send(len, sendbuf);
+    while(1) {
+        uint8_t sendbuf[MAV_MESSAGE_SIZE];
+        mavlink_message_t msg;
+        mavlink_message_t rcvMsg;
+        mavlink_status_t rcvStatus;
+        bool notParsed = true;
 
-	sleep(1);
+        mavlink_msg_heartbeat_pack(1, 200, &msg, MAV_TYPE_HELICOPTER,
+                MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
+                0, MAV_STATE_ACTIVE);
 
-	sw.read();
+        len = mavlink_msg_to_send_buffer(sendbuf, &msg);
+        std::cout << "SEND:" << std::endl;
+        for ( auto& elem : sendbuf) {
+            printf("%02x", (unsigned char)elem);
+        }
+        std::cout << std::endl;
 
-	while(sw.size() < 17) {
-		sleep(1);
-		sw.send(len, sendbuf);
-		sw.read();
-		std::cout << "Test" << std::endl;
-	}
+        sw.send(len, sendbuf);
 
-	std::array <uint8_t, MAV_MESSAGE_SIZE> arr(sw.get());
-	if(mavlink_parse_char(MAVLINK_COMM_0, arr[0], &msg, &status)) {
+        sleep(1);
+        readBytes = sw.read();
+        std::cout << "Read in " << readBytes << " bytes" << std::endl;
+        int rcvBufferIndex(0);
 
-	printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
-	       msg.sysid, msg.compid, msg.len, msg.msgid);
-	}
+        while (sw.size () > 0 && notParsed) {
+
+            uint8_t byte(sw.get());
+            rcvBuffer[rcvBufferIndex++] = byte;
+            
+
+            if(mavlink_parse_char(MAVLINK_COMM_0, byte, &rcvMsg, &rcvStatus)) {
+                notParsed = false;
+                std::cout << "RECIEVE:" << std::endl;
+                for (int i = 0; i < rcvBufferIndex; ++i) {
+                    printf("%02x", (unsigned char)rcvBuffer[i]);
+                 
+                }
+                std::cout << std::endl;
+
+                printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSGID: %d\n",
+                        rcvMsg.sysid, rcvMsg.compid, rcvMsg.len, rcvMsg.msgid);
+
+                if (rcvMsg.msgid == 0) {
+                    mavlink_heartbeat_t heartbeat;
+                    mavlink_msg_heartbeat_decode( &rcvMsg, &heartbeat);
+                    printf("\nHeartbeat Message: CUSTOM_MODE: %u TYPE: %d AUTOPILOT: %u BASE_MODE: %u SYSTEM_STATUS: %u MAVLINK_VERSION: %u\n", 
+                            heartbeat.custom_mode,
+                            heartbeat.type,
+                            heartbeat.autopilot ,
+                            heartbeat.base_mode ,
+                            heartbeat.system_status,
+                            heartbeat.mavlink_version);
+                }
+
+            }
+        }
+    }
 }

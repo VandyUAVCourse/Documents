@@ -1,22 +1,21 @@
 
-        //Constructor
-        //@param serialPortDevice The name of the serial port
-        //@param buad The baud rate of the serial port
-        //@param charsize The character size to send over the serial port
-        //@param parity The number of parity bits to set
-        //@param stopbits The number of stop bits to set
-        //@param flow_control What kind of flow control to set
-        //  TODO: Insert Types for all parameters
-        //
-        //  @ Description:
-        //  Opens a serial port with the specififed name. Optional parameters are set to defaults below
-template<int BUFFER_SIZE>
-Serial_Wrapper<BUFFER_SIZE>::Serial_Wrapper (std::string serialPortDevice, 
-                                LibSerial::SerialStreamBuf::BaudRateEnum baud,
-                                LibSerial::SerialStreamBuf::CharSizeEnum charsize,
-                                LibSerial::SerialStreamBuf::ParityEnum parity,
-                                int stopbits,
-                                LibSerial::SerialStreamBuf::FlowControlEnum flow_control)
+//Constructor
+//@param serialPortDevice The name of the serial port
+//@param buad The baud rate of the serial port
+//@param charsize The character size to send over the serial port
+//@param parity The number of parity bits to set
+//@param stopbits The number of stop bits to set
+//@param flow_control What kind of flow control to set
+//  TODO: Insert Types for all parameters
+//
+//  @ Description:
+//  Opens a serial port with the specififed name. Optional parameters are set to defaults below
+Serial_Wrapper::Serial_Wrapper (std::string serialPortDevice, 
+        LibSerial::SerialStreamBuf::BaudRateEnum baud,
+        LibSerial::SerialStreamBuf::CharSizeEnum charsize,
+        LibSerial::SerialStreamBuf::ParityEnum parity,
+        int stopbits,
+        LibSerial::SerialStreamBuf::FlowControlEnum flow_control)
     // Default Initializers are OK 
 {
     serialPort_.Open(serialPortDevice);
@@ -36,12 +35,9 @@ Serial_Wrapper<BUFFER_SIZE>::Serial_Wrapper (std::string serialPortDevice,
 //
 // @description: Sends the message over the serial port
 //
-// TODO: buf - should we templatize the length? How do we handle that?
-// TODO: Better to omit msg entirely? Probably yes, just send in the buffer
-template<int BUFFER_SIZE>
-void Serial_Wrapper<BUFFER_SIZE>::send ( uint16_t len, uint8_t buf[BUFFER_SIZE])
+void Serial_Wrapper::send ( uint16_t len, uint8_t* buf)
 {
-    serialPort_.write((char*)&buf, len);
+    serialPort_.write((char*)buf, len);
 }
 
 // read
@@ -49,15 +45,17 @@ void Serial_Wrapper<BUFFER_SIZE>::send ( uint16_t len, uint8_t buf[BUFFER_SIZE])
 // @ Description
 // Reads all available data off of serial port into a buffer and returns the number of 
 // available bytes
-template <int BUFFER_SIZE>
-int Serial_Wrapper<BUFFER_SIZE>::read () 
+// TODO: Danger of not getting full packet - I could be reading some garbage in
+int Serial_Wrapper::read () 
 {
     int bytesRcvd(0);
-    char next_byte(0);
+    char rcvByte, trash;
+
     if (serialPort_.rdbuf()->in_avail() > 0) {
-        while (serialPort_.rdbuf()->in_avail() > 0) {
-            serialPort_.get(next_byte);
-            rcvBuffer_.push( (uint8_t) next_byte);
+        while (serialPort_.rdbuf()->in_avail() > 0 ) {
+            rcvByte = serialPort_.peek();
+            rcvBuffer_.push(rcvByte);
+            serialPort_.get(trash);
             ++bytesRcvd;
         }
     }
@@ -74,20 +72,15 @@ int Serial_Wrapper<BUFFER_SIZE>::read ()
 // @ Throws
 // Throws an exception TODO: What exception?
 // if more bytes are requested than are available
-template <int BUFFER_SIZE>
-std::array <uint8_t, BUFFER_SIZE> Serial_Wrapper<BUFFER_SIZE>::get ()
+uint8_t Serial_Wrapper::get ()
 {
-    if (size () < BUFFER_SIZE)
-        throw std::underflow_error("Serial_Wrapper::get () Not enough bytes in queue to pack a message");
+    if (size () < 1)
+        throw std::underflow_error("Serial_Wrapper::get () has no bytes in its queue");
 
-    std::array <uint8_t, BUFFER_SIZE> array;
+    uint8_t temp = rcvBuffer_.front();  
+    rcvBuffer_.pop();
 
-    for ( auto& elem : array) {
-        elem = rcvBuffer_.front();
-        rcvBuffer_.pop();
-    }
-
-    return array;
+    return temp;
 }
 
 // size
@@ -96,8 +89,7 @@ std::array <uint8_t, BUFFER_SIZE> Serial_Wrapper<BUFFER_SIZE>::get ()
 //
 // @ Description
 // Returns the number of bytes available to read off of the FIFO buffer
-template <int BUFFER_SIZE>
-int Serial_Wrapper<BUFFER_SIZE>::size ()
+int Serial_Wrapper::size ()
 {
     return rcvBuffer_.size();
 }
@@ -106,10 +98,7 @@ int Serial_Wrapper<BUFFER_SIZE>::size ()
 //
 // @ Description
 // Closes the serial port.
-template <int BUFFER_SIZE>
-Serial_Wrapper<BUFFER_SIZE>::~Serial_Wrapper()
+Serial_Wrapper::~Serial_Wrapper()
 {
-   serialPort_.Close(); 
+    serialPort_.Close(); 
 }
-
-
