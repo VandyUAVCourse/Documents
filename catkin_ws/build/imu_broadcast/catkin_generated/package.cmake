@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "imu_broadcast")
+set(imu_broadcast_MAINTAINER "UAVTeam <UAVTeam@todo.todo>")
+set(imu_broadcast_DEPRECATED "")
+set(imu_broadcast_VERSION "0.0.0")
+set(imu_broadcast_BUILD_DEPENDS "roscpp" "std_msgs" "message_generation")
+set(imu_broadcast_RUN_DEPENDS "roscpp" "message_runtime" "std_msgs")
+set(imu_broadcast_BUILDTOOL_DEPENDS "catkin")

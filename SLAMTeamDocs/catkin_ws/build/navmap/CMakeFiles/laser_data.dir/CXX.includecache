@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/UAVTeam/catkin_ws/src/navmap/src/laser_data.cpp
+/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap/src/laser_data.cpp
 string
 -
 iostream
@@ -16,11 +16,11 @@ cmath
 math.h
 -
 ros/ros.h
-/home/UAVTeam/catkin_ws/src/navmap/src/ros/ros.h
+/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap/src/ros/ros.h
 std_msgs/String.h
-/home/UAVTeam/catkin_ws/src/navmap/src/std_msgs/String.h
+/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap/src/std_msgs/String.h
 sensor_msgs/LaserScan.h
-/home/UAVTeam/catkin_ws/src/navmap/src/sensor_msgs/LaserScan.h
+/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap/src/sensor_msgs/LaserScan.h
 
 /opt/ros/hydro/include/XmlRpcDecl.h
 ros/macros.h

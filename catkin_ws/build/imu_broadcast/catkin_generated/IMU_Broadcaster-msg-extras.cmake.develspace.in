@@ -1,0 +1,2 @@
+set(IMU_Broadcaster_MESSAGE_FILES "/home/UAVTeam/catkin_ws/src/imu_broadcast/msgs/attitude.msg")
+set(IMU_Broadcaster_SERVICE_FILES "")

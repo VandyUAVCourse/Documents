@@ -1,0 +1,21 @@
+
+(cl:in-package :asdf)
+
+(defsystem "navmap-msg"
+  :depends-on (:roslisp-msg-protocol :roslisp-utils )
+  :components ((:file "_package")
+    (:file "raw_imu" :depends-on ("_package_raw_imu"))
+    (:file "_package_raw_imu" :depends-on ("_package"))
+    (:file "attitude" :depends-on ("_package_attitude"))
+    (:file "_package_attitude" :depends-on ("_package"))
+    (:file "proj_2_5d_msg" :depends-on ("_package_proj_2_5d_msg"))
+    (:file "_package_proj_2_5d_msg" :depends-on ("_package"))
+    (:file "pose_ukf_msg" :depends-on ("_package_pose_ukf_msg"))
+    (:file "_package_pose_ukf_msg" :depends-on ("_package"))
+    (:file "pose_estimator_msg" :depends-on ("_package_pose_estimator_msg"))
+    (:file "_package_pose_estimator_msg" :depends-on ("_package"))
+    (:file "point2d_t" :depends-on ("_package_point2d_t"))
+    (:file "_package_point2d_t" :depends-on ("_package"))
+    (:file "state_ukf_msg" :depends-on ("_package_state_ukf_msg"))
+    (:file "_package_state_ukf_msg" :depends-on ("_package"))
+  ))

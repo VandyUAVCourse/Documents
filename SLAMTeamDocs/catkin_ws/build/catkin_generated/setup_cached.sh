@@ -7,4 +7,12 @@
 # new environment variables
 
 # modified environment variables
-export PWD="/home/UAVTeam/catkin_ws/build"
+export CMAKE_PREFIX_PATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel:$CMAKE_PREFIX_PATH"
+export CPATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel/include:$CPATH"
+export LD_LIBRARY_PATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel/lib:$LD_LIBRARY_PATH"
+export PATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel/bin:/home/UAVTeam/catkin_ws/devel/bin:/opt/ros/hydro/bin:/home/UAVTeam/bin:/home/UAVTeam/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+export PKG_CONFIG_PATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PWD="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build"
+export PYTHONPATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel/lib/python2.7/dist-packages:$PYTHONPATH"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
+export ROS_PACKAGE_PATH="/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src:/home/UAVTeam/catkin_ws/src:$ROS_PACKAGE_PATH"

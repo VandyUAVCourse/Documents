@@ -1,0 +1,8 @@
+prefix=/home/UAVTeam/catkin_ws/install
+
+Name: kalman_filters
+Description: Description of kalman_filters
+Version: 1.0.0
+Cflags: -I/home/UAVTeam/catkin_ws/install/include
+Libs: -L/home/UAVTeam/catkin_ws/install/lib 
+Requires: roscpp std_msgs geometry_msgs message_runtime

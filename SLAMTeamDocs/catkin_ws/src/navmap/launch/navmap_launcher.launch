@@ -9,6 +9,5 @@
         <param name="max_ang" type="double" value="2.08621382713"/>
     </node>
 
-    <node name="laser_data" pkg="navmap" type="laser_data">
-    </node>
+    <node name="laser_data" pkg="navmap" type="laser_data"> </node>y
 </launch>

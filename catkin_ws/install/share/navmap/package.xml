@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>navmap</name>
+  <version>0.0.0</version>
+  <description>The navmap package for UAV Navigation and Mapping</description>
+
+  <maintainer email="alex.t.meyer@vanderbilt.edu">NavMapLeader</maintainer>
+
+  <license>BSD</license>
+
+  <author email="alex.t.meyer@vanderbilt.edu">Alex Meyer</author>
+  <author email="rebecca.l.turok@vanderbilt.edu">Rebecca Turok</author>
+  <author email="nolan.m.smith@vanderbilt.edu">Nolan Smith</author>
+  <author email="john.a.francis@vanderbilt.edu">John Francis</author>
+  <author email="franklin.s.snider@vanderbilt.edu">Franklin Snider</author>
+  <author email="david.m.nakayama@vanderbilt.edu">Michael Nakayama</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>hokuyo_node</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>octomap</build_depend>
+
+  <run_depend>hokuyo_node</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>octomap</run_depend>
+
+</package>

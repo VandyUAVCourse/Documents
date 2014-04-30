@@ -1,0 +1,10 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/IMU_Broadcaster/src/Serial_Wrapper.cpp
+

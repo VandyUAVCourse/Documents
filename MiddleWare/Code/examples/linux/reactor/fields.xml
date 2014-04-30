@@ -1,0 +1,125 @@
+<message id="0"         name="HEARTBEAT">
+    <field type="uint8_t"               name="type">
+    <field type="uint8_t"               name="autopilot">
+    <field type="uint8_t"               name="base_mode">
+    <field type="uint32_t"              name="custom_mode">
+    <field type="uint8_t"               name="system_status">
+    <field type="uint8_t_mavlink_version"               name="mavlink_version">
+
+<message id="1"                 name="SYS_STATUS">
+    <field type="uint32_t"     name="onboard_control_sensors_present
+    <field type="uint32_t"     name="onboard_control_sensors_enabled
+    <field type="uint32_t"     name="onboard_control_sensors_health
+    <field type="uint16_t"     name="load
+    <field type="uint16_t"     name="voltage_battery
+    <field type="int16_t"      name="current_battery
+    <field type="int8_t"       name="battery_remaining
+    <field type="uint16_t"     name="drop_rate_comm
+    <field type="uint16_t"     name="errors_comm
+    <field type="uint16_t"     name="errors_count1
+    <field type="uint16_t"     name="errors_count2
+    <field type="uint16_t"     name="errors_count3
+    <field type="uint16_t"     name="errors_count4
+
+
+<message id="2"                 name="SYSTEM_TIME">
+    <field type="uint64_t"              name="time_unix_usec
+    <field type="uint32_t"              name="time_boot_ms
+
+
+<message id="24"                name="GPS_RAW_INT">
+    <field type="uint64_t"              name="time_usec
+    <field type="uint8_t"               name="fix_type
+    <field type="int32_t"               name="lat
+    <field type="int32_t"               name="lon
+    <field type="int32_t"               name="alt
+    <field type="uint16_t"              name="eph
+    <field type="uint16_t"              name="epv
+    <field type="uint16_t"              name="vel
+    <field type="uint16_t"              name="cog
+    <field type="uint8_t"               name="satellites_visible
+
+
+<message id="27"                name="RAW_IMU">
+    <field type="uint64_t"              name="time_usec
+    <field type="int16_t"               name="xacc
+    <field type="int16_t"               name="yacc
+    <field type="int16_t"               name="zacc
+    <field type="int16_t"               name="xgyro
+    <field type="int16_t"               name="ygyro
+    <field type="int16_t"               name="zgyro
+    <field type="int16_t"               name="xmag
+    <field type="int16_t"               name="ymag
+    <field type="int16_t"               name="zmag
+
+
+<message id="29"                name="SCALED_PRESSURE">
+    <field type="uint32_t"              name="time_boot_ms
+    <field type="float"                 name="press_abs
+    <field type="float"                 name="press_diff
+    <field type="int16_t"               name="temperature
+
+<message id="30"                name="ATTITUDE">
+    <field type="uint32_t"              name="time_boot_ms
+    <field type="float"                 name="roll
+    <field type="float"                 name="pitch
+    <field type="float"                 name="yaw
+    <field type="float"                 name="rollspeed
+    <field type="float"                 name="pitchspeed
+    <field type="float"                 name="yawspeed
+
+<message id="33"                name="GLOBAL_POSITION_INT">
+    <field type="uint32_t"              name="time_boot_ms
+    <field type="int32_t"               name="lat
+    <field type="int32_t"               name="lon
+    <field type="int32_t"               name="alt
+    <field type="int32_t"               name="relative_alt
+    <field type="int16_t"               name="vx
+    <field type="int16_t"               name="vy
+    <field type="int16_t"               name="vz
+    <field type="uint16_t"              name="hdg
+
+<message id="35"                name="RC_CHANNELS_RAW">
+    <field type="uint32_t"              name="time_boot_ms
+    <field type="uint8_t"               name="port
+    <field type="uint16_t"              name="chan1_raw
+    <field type="uint16_t"              name="chan2_raw
+    <field type="uint16_t"              name="chan3_raw
+    <field type="uint16_t"              name="chan4_raw
+    <field type="uint16_t"              name="chan5_raw
+    <field type="uint16_t"              name="chan6_raw
+    <field type="uint16_t"              name="chan7_raw
+    <field type="uint16_t"              name="chan8_raw
+    <field type="uint8_t"               name="rssi
+<message id="36"                name="SERVO_OUTPUT_RAW">
+    <field type="uint32_t"      name="time_usec
+    <field type="uint8_t"       name="port
+    <field type="uint16_t"      name="servo1_raw
+    <field type="uint16_t"      name="servo2_raw
+    <field type="uint16_t"      name="servo3_raw
+    <field type="uint16_t"      name="servo4_raw
+    <field type="uint16_t"      name="servo5_raw
+    <field type="uint16_t"      name="servo6_raw
+    <field type="uint16_t"      name="servo7_raw
+    <field type="uint16_t"      name="servo8_raw
+
+<message id="42"        name="MISSION_CURRENT">
+    <field type="uint16_t"      name="seq
+
+<message id="62"        name="NAV_CONTROLLER_OUTPUT">
+    <field type="float"         name="nav_roll
+    <field type="float"         name="nav_pitch
+    <field type="int16_t"       name="nav_bearing
+    <field type="int16_t"       name="target_bearing
+    <field type="uint16_t"      name="wp_dist
+    <field type="float"         name="alt_error
+    <field type="float"         name="aspd_error
+    <field type="float"         name="xtrack_error
+
+<message id="74"        name="VFR_HUD">
+    <field type="float"         name="airspeed
+    <field type="float"         name="groundspeed
+    <field type="int16_t"       name="heading
+    <field type="uint16_t"      name="throttle
+    <field type="float"         name="alt
+    <field type="float"         name="climb

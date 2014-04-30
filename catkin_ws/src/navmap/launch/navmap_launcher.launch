@@ -1,0 +1,39 @@
+<launch>
+    <!-- HOKUYO -->
+    <node name="hokuyo" pkg="hokuyo_node" type="hokuyo_node">
+
+        <!-- Set the port to connect to here -->
+        <!-- <param name="port" type="string" value="/dev/ttyACM0"/> -->
+        <param name="port" type="string" value="/dev/hokuyo_node"/>
+        <param name="intensity" type="bool" value="false"/>
+        <param name="min_ang" type="double" value="-2.08621382713"/>
+        <param name="max_ang" type="double" value="2.08621382713"/>
+		<param name="skip" type="int" value="1"/>
+    </node>
+
+    <node name="imu_broadcast" pkg="navmap" type="broadcast_wrapper_">
+    </node>
+
+    <node name="laser_data" pkg="navmap" type="laser_data">
+    </node>
+
+    <node pkg="rosbag" type="record" name="downLRF" 
+	args="record -O /home/UAVTeam/catkin_ws/src/navmap/downLRF.bag /laser_down"/>
+    <node pkg="rosbag" type="record" name="upLRF" 
+	args="record -O /home/UAVTeam/catkin_ws/src/navmap/upLRF.bag /laser_up"/>
+    <node pkg="rosbag" type="record" name="normLRF" 
+	args="record -O /home/UAVTeam/catkin_ws/src/navmap/normLRF.bag /laser_norm"/>
+    <node pkg="rosbag" type="record" name="estAlt" 
+	args="record -O /home/UAVTeam/catkin_ws/src/navmap/estAlt.bag /est_altitude"/>
+    <node pkg="rosbag" type="record" name="estHeight" 
+	args="record -O /home/UAVTeam/catkin_ws/src/navmap/estHeight.bag /est_height"/>
+    
+    <node name="pose_ukf_node_" pkg="navmap" type="pose_ukf_node_">
+    </node>
+
+    <node name="state_ukf_node_" pkg="navmap" type="state_ukf_node_">
+    </node>
+
+	<node name="pose_estimator_node_" pkg="navmap" type="pose_estimator_node_">
+	</node>
+</launch>

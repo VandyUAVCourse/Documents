@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "kalman_filters")
+set(kalman_filters_MAINTAINER "John <john.a.francis@vanderbilt.edu>")
+set(kalman_filters_DEPRECATED "")
+set(kalman_filters_VERSION "1.0.0")
+set(kalman_filters_BUILD_DEPENDS "roscpp" "std_msgs" "geometry_msgs" "message_generation")
+set(kalman_filters_RUN_DEPENDS "roscpp" "std_msgs" "geometry_msgs" "message_runtime")
+set(kalman_filters_BUILDTOOL_DEPENDS "catkin")

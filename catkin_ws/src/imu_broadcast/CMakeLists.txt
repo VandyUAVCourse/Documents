@@ -1,0 +1,55 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(imu_broadcast)
+
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  message_generation
+)
+
+add_message_files (
+  DIRECTORY
+  msgs
+  FILES
+  attitude.msg
+  raw_imu.msg
+)
+
+generate_messages (
+  DEPENDENCIES
+  std_msgs
+)
+
+catkin_package (
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS roscpp std_msgs message_runtime
+)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+SET(GCC_COVERAGE_COMPILE_FLAGS "-std=c++0x")
+
+add_executable(Broadcast_Wrapper src/Broadcast_Wrapper.cpp src/Serial_Wrapper.cpp)
+add_dependencies(Broadcast_Wrapper imu_broadcast_generate_messages_cpp)
+
+
+add_executable(Broadcast_Listener src/Broadcast_Listener.cpp)
+
+
+add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(Broadcast_Wrapper
+  ${catkin_LIBRARIES}
+  serial
+)
+
+target_link_libraries(Broadcast_Listener
+   ${catkin_LIBRARIES}
+)

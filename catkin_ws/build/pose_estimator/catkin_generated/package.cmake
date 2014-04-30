@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "pose_estimator")
+set(pose_estimator_MAINTAINER "TODO <todo@todo.todo>")
+set(pose_estimator_DEPRECATED "")
+set(pose_estimator_VERSION "0.0.0")
+set(pose_estimator_BUILD_DEPENDS "roscpp" "std_msgs" "message_generation")
+set(pose_estimator_RUN_DEPENDS "roscpp" "std_msgs" "message_runtime")
+set(pose_estimator_BUILDTOOL_DEPENDS "catkin")

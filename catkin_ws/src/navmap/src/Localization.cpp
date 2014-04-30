@@ -1,0 +1,67 @@
+#include "Localization.h"
+#include "OctoSlamCalcs.h"
+#include "imu_broadcast/attitude.h"
+#include "sensor_msgs/LaserScan.h"
+
+const std::string IMU_DATA_IN = "/imu_attitude";
+const std::string LASER_NORM = "/laser_norm";
+const std::string ALTITUDE = "/altitude";
+const int QUEUE_SIZE = 10;
+
+// Callback function that is called when IMU Data is received
+void imuReadingCallback(const imu_broadcast::attitude attitude) {
+    current_pose.at(PHI) = attitude.roll;
+    current_pose.at(PSI) = attitude.pitch;
+}
+
+Localization::Localization(ros::NodeHandle n, std::vector<float> init_pose): node(n) {
+    if (init_pose.size() != 6) printf("Length of init_pose is incorrect");
+    current_pose = init_pose;
+    scan_sub = node.subscribe(LASER_NORM, QUEUE_SIZE, &Localization::scan_callback, this);
+	altitude_sub = nodeHandle.subscribe(ALTITUDE, QUEUE_SIZE, 
+				&Localization::altitude_callback, this);
+	imuSub = nodeHandle.subscribe(IMU_DATA_IN, QUEUE_SIZE, 
+				&Localization:imuReadingCallback, this);
+    
+	octomap::OcTree* map = new octomap::OcTree(0.2);
+
+}
+
+void Localization::altitude_callback(sensor_msgs::LaserScan altitude) {
+	double sum = 0.0;
+	for(int i = 0; i < altitude.ranges.size(); ++i) {
+		sum += altitude.ranges[i];
+	}
+    current_pose.at(Z) = sum / altitude.ranges.size();
+}
+
+void Localization::scan_callback(const sensor_msgs::LaserScan::ConstPtr &scan) {
+    // Everything is being done in floats, because that's what the scan comes as :)
+    Eigen::Vector3f T(current_pose.at(X), current_pose.at(Y), current_pose.at(GAMMA));
+    std::vector<octomath::Vector3> t_scan = calculations::transform_scan(scan, current_pose);
+    Eigen::Matrix3f Hessian;
+    Eigen::Vector3f det;
+    octomath::Vector3 endpoint;
+    octomath::Vector3 map_values;
+    std::vector<octomath::Vector3> closest; // Rounded voxels
+    float mv, dx, dy, gammaP, mres;
+    for (int n = 0; n < ITERATIONS; ++n) {
+        Hessian.setZero();
+        det.setZero();
+        for (int i = 0; i < t_scan.size(); ++i) {
+            endpoint = t_scan.at(i);
+            mres = calculations::calc_mres(map, endpoint);
+            closest = calculations::round_voxels(endpoint, mres);
+            map_values = calculations::calc_map_values(map, endpoint, closest, mres);
+            mv = map_values.x(); dx = map_values.y(); dy = map_values.z();
+            gammaP = calculations::calc_gammaP(current_pose.at(GAMMA), endpoint.x(), endpoint.y(), 
+                    dx, dy);
+            Hessian = Hessian + calculations::calc_hessian(dx, dy, gammaP);
+            det = det + calculations::calc_det(mv, dx, dy, gammaP);
+        }
+        T = T + (Hessian * det);
+    }
+    current_pose.at(X) = T(0);
+    current_pose.at(Y) = T(1);
+    current_pose.at(GAMMA) = T(2);
+}

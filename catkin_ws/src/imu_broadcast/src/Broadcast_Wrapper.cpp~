@@ -1,0 +1,102 @@
+#include <../include/imu_broadcast/mavlink/include/mavlink/v1.0/common/mavlink.h>
+#include <vector>
+
+#include "../include/imu_broadcast/Serial_Wrapper.h"
+#include "imu_broadcast/attitude.h"
+#include "imu_broadcast/raw_imu.h"
+
+//TODO: RM DEBUG
+#include <iostream>
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include <string>
+
+#define MAV_MESSAGE_SIZE 17
+
+int main (int argc, char** argv) {
+
+    Serial_Wrapper sw("/dev/ttyACM0");
+
+    // Initialize ROS node and tell the master node the name of our node
+    ros::init(argc, argv, "imu_broadcaster");
+    ros::NodeHandle node;
+    ros::Publisher att_pub = node.advertise<imu_broadcast::attitude>("imu_attitude", 1000);
+    ros::Publisher raw_pub = node.advertise<imu_broadcast::raw_imu>("imu_scaled", 1000);
+    ros::Rate loop_rate(1000);
+    
+    std::vector <uint8_t> rcvBuffer(500); //To store the contents of recieved message for debugging
+    uint16_t len;
+    int readBytes = 0;
+
+    while(ros::ok()) {
+        uint8_t sendbuf[MAV_MESSAGE_SIZE];
+        mavlink_message_t msg;
+        mavlink_message_t rcvMsg;
+        mavlink_status_t rcvStatus;
+        bool notParsed = true;
+	
+	char broadcastString[500];
+	
+        mavlink_msg_heartbeat_pack(1, 200, &msg, MAV_TYPE_HELICOPTER,
+                MAV_AUTOPILOT_GENERIC, MAV_MODE_GUIDED_ARMED, 
+                0, MAV_STATE_ACTIVE);
+
+        len = mavlink_msg_to_send_buffer(sendbuf, &msg);
+
+        sw.send(len, sendbuf);
+
+        readBytes = sw.read();
+        int rcvBufferIndex(0);
+
+        while (sw.size () > 0 && notParsed) {
+
+            uint8_t byte(sw.get());
+            rcvBuffer[rcvBufferIndex++] = byte;
+            
+            if(mavlink_parse_char(MAVLINK_COMM_0, byte, &rcvMsg, &rcvStatus)) {
+                notParsed = false;
+		
+		if (rcvMsg.msgid == 30) {
+
+		  mavlink_attitude_t attitude;
+		  mavlink_msg_attitude_decode(&rcvMsg, &attitude);
+
+		  imu_broadcast::attitude broadcast_att;
+		  broadcast_att.roll = attitude.roll;
+		  broadcast_att.pitch = attitude.pitch;
+		  broadcast_att.yaw = attitude.yaw;
+
+		  ROS_INFO("Broadcast: %f, %f, %f", broadcast_att.roll, 
+			   broadcast_att.pitch, broadcast_att.yaw);
+
+		  att_pub.publish(broadcast_att);
+		  ros::spinOnce();
+		  loop_rate.sleep();
+		}
+
+		if (rcvMsg.msgid == 27) {
+		  
+		  mavlink_raw_imu_t raw_imu;
+		  mavlink_msg_raw_imu_decode(&rcvMsg, &raw_imu);
+		  
+		  imu_broadcast::raw_imu broadcast_raw;
+		  broadcast_raw.xacc = raw_imu.xacc;
+		  broadcast_raw.yacc = raw_imu.yacc;
+		  broadcast_raw.zacc = raw_imu.zacc;
+		  broadcast_raw.xgyro = raw_imu.xgyro;
+		  broadcast_raw.ygyro = raw_imu.ygyro;
+		  broadcast_raw.zgyro = raw_imu.zgyro;
+
+		  ROS_INFO("Broadcast: %d, %d, %d, %d, %d, %d", 
+			   broadcast_raw.xacc, broadcast_raw.yacc,
+			   broadcast_raw.zacc, broadcast_raw.xgyro,
+			   broadcast_raw.ygyro, broadcast_raw.zgyro);
+
+		  raw_pub.publish(broadcast_raw);
+		  ros::spinOnce();
+		  loop_rate.sleep();
+		}
+            }
+        }
+    }
+}

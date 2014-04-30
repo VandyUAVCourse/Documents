@@ -1,8 +1,8 @@
-# Install script for directory: /home/UAVTeam/catkin_ws/src/navmap
+# Install script for directory: /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_INSTALL_PREFIX "/home/UAVTeam/catkin_ws/install")
+  SET(CMAKE_INSTALL_PREFIX "/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/install")
 ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 STRING(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,17 +33,17 @@ IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/UAVTeam/catkin_ws/build/navmap/catkin_generated/installspace/navmap.pc")
+  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build/navmap/catkin_generated/installspace/navmap.pc")
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/navmap/cmake" TYPE FILE FILES
-    "/home/UAVTeam/catkin_ws/build/navmap/catkin_generated/installspace/navmapConfig.cmake"
-    "/home/UAVTeam/catkin_ws/build/navmap/catkin_generated/installspace/navmapConfig-version.cmake"
+    "/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build/navmap/catkin_generated/installspace/navmapConfig.cmake"
+    "/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build/navmap/catkin_generated/installspace/navmapConfig-version.cmake"
     )
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/navmap" TYPE FILE FILES "/home/UAVTeam/catkin_ws/src/navmap/package.xml")
+  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/navmap" TYPE FILE FILES "/home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap/package.xml")
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 

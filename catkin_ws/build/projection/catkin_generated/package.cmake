@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "projection")
+set(projection_MAINTAINER "NavMapLeader <alex.t.meyer@vanderbilt.edu>")
+set(projection_DEPRECATED "")
+set(projection_VERSION "0.0.0")
+set(projection_BUILD_DEPENDS "hokuyo_node" "roscpp" "sensor_msgs" "std_msgs")
+set(projection_RUN_DEPENDS "hokuyo_node" "roscpp" "sensor_msgs" "std_msgs")
+set(projection_BUILDTOOL_DEPENDS "catkin")

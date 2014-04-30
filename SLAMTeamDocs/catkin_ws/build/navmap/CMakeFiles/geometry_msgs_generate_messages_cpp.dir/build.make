@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/UAVTeam/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/UAVTeam/catkin_ws/build
+CMAKE_BINARY_DIR = /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build
 
 # Utility rule file for geometry_msgs_generate_messages_cpp.
 
@@ -53,10 +53,10 @@ navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/build: geometry_msgs_g
 .PHONY : navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/build
 
 navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/clean:
-	cd /home/UAVTeam/catkin_ws/build/navmap && $(CMAKE_COMMAND) -P CMakeFiles/geometry_msgs_generate_messages_cpp.dir/cmake_clean.cmake
+	cd /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build/navmap && $(CMAKE_COMMAND) -P CMakeFiles/geometry_msgs_generate_messages_cpp.dir/cmake_clean.cmake
 .PHONY : navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/clean
 
 navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/depend:
-	cd /home/UAVTeam/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/UAVTeam/catkin_ws/src /home/UAVTeam/catkin_ws/src/navmap /home/UAVTeam/catkin_ws/build /home/UAVTeam/catkin_ws/build/navmap /home/UAVTeam/catkin_ws/build/navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/src/navmap /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build/navmap /home/UAVTeam/CS292/Documents/SLAMTeamDocs/catkin_ws/build/navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : navmap/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/depend
 

@@ -1,0 +1,278 @@
+// Alex Meyer
+// NavMap
+// CS-292 UAV
+
+#include <string>
+#include <iostream>
+#include <cmath>
+#include <math.h>
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "sensor_msgs/LaserScan.h"
+#include "std_msgs/Float32.h"
+#include "rosbag/bag.h"
+#include "imu_broadcast/attitude.h"
+
+// Constants of ROS Topic names for publishing and subscribing
+const std::string LASER_DATA_IN = "/scan";
+const std::string IMU_DATA_IN = "/imu_attitude";
+const std::string LASER_NORM_OUT = "/laser_norm";
+const std::string LASER_UP_OUT = "/laser_up";
+const std::string LASER_DOWN_OUT = "/laser_down";
+const std::string ALTITUDE_OUT = "/altitude";
+const std::string ESTIMATED_ALTITUDE_OUT = "/est_altitude";
+const std::string ESTIMATED_HEIGHT_OUT = "/est_height";
+
+const double EXPONENTIAL_MOVING_AVG_ALPHA = .7;
+const double MAX_VARIANCE_THRESHOLD = .1;
+const int QUEUE_SIZE = 10;
+const int REFRESH_RATE = 30; // in hz
+
+// Constants used for splitting LRF Reading into up, down, and norm
+const double RADIUS_TO_DOWN_MIRROR_REFLECT_POINT = .104; // In meters
+const double RADIUS_TO_UP_MIRROR_REFLECT_POINT = .11; // In meters
+const double HOKUYO_MIN_ANG = -2.08621382713;
+const double HOKUYO_MAX_ANG = 2.08007788658;
+const double PI = 3.1415926;
+const double HOKUYO_MEASUREMENT_ANGLE = HOKUYO_MAX_ANG - HOKUYO_MIN_ANG;
+const double SQUARE_MIRROR_SIZE = .022; // In meters
+const double MOUNT_EXTRA_ON_EACH_SIDE_OF_MIRROR = .011; // In meters
+
+// Class used to split incoming LRF Readings into up, down, and normal and find
+// valid altitude reading values and estimate the height of the area UAV is in
+class SplitLaserReadingCalculateAltitudeAndHeight 
+{
+public:
+	SplitLaserReadingCalculateAltitudeAndHeight() {
+		// Initialize Subscribers to LRF and IMU Topics
+		laserSub = nodeHandle.subscribe(LASER_DATA_IN, QUEUE_SIZE, 
+				&SplitLaserReadingCalculateAltitudeAndHeight::laserReadingCallback, this);
+		imuSub = nodeHandle.subscribe(IMU_DATA_IN, QUEUE_SIZE, 
+				&SplitLaserReadingCalculateAltitudeAndHeight::imuReadingCallback, this);
+		// Initialize Publishers for split LRF up, down, normal readings
+		downPub = nodeHandle.advertise<sensor_msgs::LaserScan>(LASER_DOWN_OUT, QUEUE_SIZE);
+		upPub = nodeHandle.advertise<sensor_msgs::LaserScan>(LASER_UP_OUT, QUEUE_SIZE);
+		normPub = nodeHandle.advertise<sensor_msgs::LaserScan>(LASER_NORM_OUT, QUEUE_SIZE);
+
+		debug = nodeHandle.advertise<std_msgs::String>("debug", QUEUE_SIZE);
+		// Initialize publishers for valid altitude LRF readings, altitude of vehicle estimation, height of area estimation
+		altitudePub = nodeHandle.advertise<sensor_msgs::LaserScan>(ALTITUDE_OUT, QUEUE_SIZE);
+		estAltitudePub = nodeHandle.advertise<std_msgs::Float32>(ESTIMATED_ALTITUDE_OUT, QUEUE_SIZE);
+		estHeightPub = nodeHandle.advertise<std_msgs::Float32>(ESTIMATED_HEIGHT_OUT, QUEUE_SIZE);
+		
+		ros::Rate loop_rate(REFRESH_RATE);
+		
+		downRunningWeightedAvg = 0;
+		upRunningWeightedAvg = 0;
+		estimatedAltitude.data = 0;
+		estimatedAreaHeight.data = 0;
+		
+		imu_roll = 0;
+		imu_pitch = 0;
+	}
+	
+	// Callback function that is called when LRF Reading is received
+	void laserReadingCallback(const sensor_msgs::LaserScan reading) {
+		double radiansPerReadingValue = (HOKUYO_MAX_ANG - HOKUYO_MIN_ANG) / reading.ranges.size();
+
+		double anglePerDownMirror = 2 * atan((SQUARE_MIRROR_SIZE / 2) / RADIUS_TO_DOWN_MIRROR_REFLECT_POINT);
+		double anglePerUpMirror = 2 * atan((SQUARE_MIRROR_SIZE / 2) / RADIUS_TO_UP_MIRROR_REFLECT_POINT);
+
+		double angleBlockedPerDownMount = 2 * atan(
+			(MOUNT_EXTRA_ON_EACH_SIDE_OF_MIRROR + (SQUARE_MIRROR_SIZE / 2))
+			/ RADIUS_TO_DOWN_MIRROR_REFLECT_POINT) - anglePerDownMirror;
+		double angleBlockedPerUpMount = 2 * atan(
+			(MOUNT_EXTRA_ON_EACH_SIDE_OF_MIRROR + (SQUARE_MIRROR_SIZE / 2))
+			/ RADIUS_TO_UP_MIRROR_REFLECT_POINT) - anglePerUpMirror;
+
+		int readingValuesPerDownMirror = floor(anglePerDownMirror / radiansPerReadingValue);
+		int readingValuesPerUpMirror = floor(anglePerUpMirror / radiansPerReadingValue);
+
+		int readingValuesBlockedPerDownMount = floor(angleBlockedPerDownMount / radiansPerReadingValue);
+		int readingValuesBlockedPerUpMount = floor(angleBlockedPerUpMount / radiansPerReadingValue);
+
+		int readingValuesPerNorm = floor(reading.ranges.size() - 
+			(readingValuesPerDownMirror + readingValuesBlockedPerDownMount
+			+ readingValuesPerUpMirror + readingValuesBlockedPerUpMount));
+
+		double down_ang_min = HOKUYO_MIN_ANG;
+		double down_ang_max = HOKUYO_MIN_ANG + anglePerDownMirror;
+		double up_ang_min = HOKUYO_MAX_ANG - anglePerUpMirror;
+		double up_ang_max = HOKUYO_MAX_ANG;
+		double norm_ang_min = down_ang_max + angleBlockedPerDownMount;
+		double norm_ang_max = up_ang_min - angleBlockedPerUpMount;
+
+		setupLaserScan(reading, down, "laser_down", down_ang_min, down_ang_max, readingValuesPerDownMirror);
+		setupLaserScan(reading, up, "laser_up", up_ang_min, up_ang_max, readingValuesPerUpMirror);
+		setupLaserScan(reading, norm, "laser_norm", norm_ang_min, norm_ang_max, readingValuesPerNorm);
+
+		int curIndexOfCurrent = 0;
+		for(int i = 0; i < readingValuesPerDownMirror; ++i) {
+			down.ranges[curIndexOfCurrent++] = reading.ranges[i] - RADIUS_TO_DOWN_MIRROR_REFLECT_POINT;	
+		}
+		curIndexOfCurrent = 0;
+		for(int i = reading.ranges.size() - readingValuesPerUpMirror; i < reading.ranges.size(); ++i)
+			up.ranges[curIndexOfCurrent++] = reading.ranges[i] - RADIUS_TO_UP_MIRROR_REFLECT_POINT;
+		curIndexOfCurrent = 0;
+		for(int i = readingValuesPerDownMirror + readingValuesBlockedPerDownMount;
+				 i < reading.ranges.size() - (readingValuesPerUpMirror + readingValuesBlockedPerUpMount);
+				 ++i) {
+			norm.ranges[curIndexOfCurrent++] = reading.ranges[i];
+		}
+		
+		downPub.publish(down);
+		upPub.publish(up);
+		normPub.publish(norm);
+		altitudeAndHeightCalculationsAndPublish();
+	}
+	
+	// TODO
+	// Callback function that is called when IMU Data is received
+	void imuReadingCallback(const imu_broadcast::attitude attitude) {
+		std_msgs::String output;
+		output.data = "Attitude received";
+		debug.publish(output);
+		imu_roll = attitude.roll;
+		imu_pitch = attitude.pitch;
+	}
+
+private:
+	ros::NodeHandle nodeHandle;
+	
+	ros::Subscriber laserSub;
+	ros::Subscriber imuSub;
+	
+	ros::Publisher downPub;
+	ros::Publisher upPub;
+	ros::Publisher normPub;
+	ros::Publisher altitudePub;
+	ros::Publisher estAltitudePub;
+	ros::Publisher estHeightPub;
+	
+	ros::Publisher debug;
+	
+	sensor_msgs::LaserScan down;
+	sensor_msgs::LaserScan up;
+	sensor_msgs::LaserScan norm;
+
+	std_msgs::Float32 estimatedAreaHeight;
+	std_msgs::Float32 estimatedAltitude;
+	
+	double downRunningWeightedAvg;
+	double upRunningWeightedAvg;
+	double downVariance;
+	double upVariance;
+	double imu_roll;
+	double imu_pitch;
+
+	// Setup laser reading we have reference to based on initial reading and adjustments
+	void setupLaserScan(const sensor_msgs::LaserScan& reading,
+				sensor_msgs::LaserScan& msg, 
+				std::string frame_id, 
+				double angle_min, 
+				double angle_max, 
+				int num_readings) {
+		msg.header.stamp = reading.header.stamp;
+		msg.header.frame_id = frame_id;
+		msg.angle_min = angle_min;
+		msg.angle_max = angle_max;
+		msg.angle_increment = reading.angle_increment;
+		msg.time_increment = reading.time_increment;
+		msg.range_min = reading.range_min;
+		msg.range_max = reading.range_max;
+		msg.ranges.resize(num_readings);
+	}
+	
+	void altitudeAndHeightCalculationsAndPublish() {
+		bool validData = true;
+		estimatedAltitude.data = 0;
+		sensor_msgs::LaserScan& output = down;
+		calculateUpDownVariancesAdjustUpDownIMUAndEstimateHeight();
+		if(downVariance > MAX_VARIANCE_THRESHOLD) {
+			if(upVariance > MAX_VARIANCE_THRESHOLD) {
+				validData = false;
+			} else {
+				// Adjust using height estimate to appear like down data
+				for(int i = 0; i < up.ranges.size(); ++i)
+					up.ranges[i] = estimatedAreaHeight.data - up.ranges[i];
+				output = up;
+				estimatedAltitude.data = calculateMeanOfRanges(up);
+			}
+		} else {
+			output = down;
+			estimatedAltitude.data = calculateMeanOfRanges(down);
+		}
+		if(validData) {
+			if(estimatedAreaHeight.data != 0) {
+				output.header.frame_id = "altitude-range";
+				altitudePub.publish(output);
+			}
+			if(estimatedAltitude.data != 0)
+				estAltitudePub.publish(estimatedAltitude);
+		}
+	}
+	
+	void adjustScanByIMUData(sensor_msgs::LaserScan& scan) {
+		for(int i = 0; i < scan.ranges.size(); ++i)
+			scan.ranges[i] = scan.ranges[i] * cos(imu_pitch) * cos(imu_roll);
+	}
+
+	// Use an exponential weighted moving average for calculations of variance
+	void calculateUpDownVariancesAdjustUpDownIMUAndEstimateHeight() {
+		double downMean = calculateMeanOfRanges(down),
+			   upMean = calculateMeanOfRanges(up);
+		
+		if(downRunningWeightedAvg == 0 || std::isnan(downRunningWeightedAvg) || std::isinf(downRunningWeightedAvg))
+			downRunningWeightedAvg = downMean;
+		else
+			downRunningWeightedAvg = calculateExponentialWeightedAvg(downRunningWeightedAvg, downMean);
+		downVariance = calculateVarianceOfRanges(down, downRunningWeightedAvg);
+
+		if(upRunningWeightedAvg == 0 || std::isnan(upRunningWeightedAvg) || std::isinf(upRunningWeightedAvg))
+			upRunningWeightedAvg = upMean;
+		else
+			upRunningWeightedAvg = calculateExponentialWeightedAvg(upRunningWeightedAvg, upMean);
+		upVariance = calculateVarianceOfRanges(up, upRunningWeightedAvg);
+
+		if(downVariance < MAX_VARIANCE_THRESHOLD) {
+			adjustScanByIMUData(down);
+		}
+		if(upVariance < MAX_VARIANCE_THRESHOLD) {
+			adjustScanByIMUData(up);
+		}
+
+		if(downVariance < MAX_VARIANCE_THRESHOLD && upVariance < MAX_VARIANCE_THRESHOLD) {
+			estimatedAreaHeight.data = calculateMeanOfRanges(up) + calculateMeanOfRanges(down);
+		}
+		estHeightPub.publish(estimatedAreaHeight);
+	}
+	
+	// Variance = (SUM(xi-xbar)^2) / (n-1)
+	double calculateVarianceOfRanges(const sensor_msgs::LaserScan& scan, double runningAvg) {
+		double eachValueMinusMeanSquaredSum = 0;
+		for(int i = 0; i < scan.ranges.size(); ++i) {
+			eachValueMinusMeanSquaredSum += pow(scan.ranges[i] - runningAvg, 2);
+		}
+		return (eachValueMinusMeanSquaredSum / (scan.ranges.size() - 1));
+	}
+	
+	double calculateMeanOfRanges(const sensor_msgs::LaserScan& scan) {
+		double mean = 0;
+		for(int i = 0; i < scan.ranges.size(); ++i)
+			mean += scan.ranges[i];
+		mean /= scan.ranges.size();
+		return mean;
+	}
+	
+	double calculateExponentialWeightedAvg(double curRunningAvg, double newAvg) {
+		return (newAvg * EXPONENTIAL_MOVING_AVG_ALPHA) + (curRunningAvg * (1 - EXPONENTIAL_MOVING_AVG_ALPHA));
+	}
+};
+
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "laser_pub_sub");
+    SplitLaserReadingCalculateAltitudeAndHeight splitPub;
+    ros::spin();
+    return 0;
+}
