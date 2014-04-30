@@ -12,7 +12,6 @@ SET(CMAKE_FORCE_UNIX_PATHS 1)
 SET(CMAKE_C_INCLUDE_PATH
   "/home/UAVTeam/catkin_ws/devel/include"
   "/home/UAVTeam/catkin_ws/src/navmap/include"
-  "/home/UAVTeam/catkin_ws/src/imu_broadcast/include"
   "/opt/ros/hydro/include"
   "/usr/include/eigen3"
   )

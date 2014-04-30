@@ -338,8 +338,7 @@ hokuyo_node_DIR:PATH=/opt/ros/hydro/share/hokuyo_node/cmake
 //Value Computed by CMake
 imu_broadcast_BINARY_DIR:STATIC=/home/UAVTeam/catkin_ws/build/imu_broadcast
 
-//The directory containing a CMake configuration file for imu_broadcast.
-imu_broadcast_DIR:PATH=/home/UAVTeam/catkin_ws/devel/share/imu_broadcast/cmake
+imu_broadcast_DIR:PATH=
 
 //Value Computed by CMake
 imu_broadcast_SOURCE_DIR:STATIC=/home/UAVTeam/catkin_ws/src/imu_broadcast

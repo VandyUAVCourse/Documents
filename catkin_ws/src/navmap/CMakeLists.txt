@@ -12,8 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   rosbag
-  imu_broadcast
-  angles
   tf
 )
 
@@ -98,7 +96,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES laser_geometry
-  CATKIN_DEPENDS hokuyo_node roscpp sensor_msgs std_msgs geometry_msgs message_runtime rosbag imu_broadcast
+  CATKIN_DEPENDS hokuyo_node roscpp sensor_msgs std_msgs geometry_msgs message_runtime rosbag
   DEPENDS Boost Eigen
 )
 

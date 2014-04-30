@@ -12,9 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   rosbag
-  imu_broadcast
-  angles
-  tf
 )
 
 find_package(Eigen REQUIRED)
@@ -98,7 +95,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES laser_geometry
-  CATKIN_DEPENDS hokuyo_node roscpp sensor_msgs std_msgs geometry_msgs message_runtime rosbag imu_broadcast
+  CATKIN_DEPENDS hokuyo_node roscpp sensor_msgs std_msgs geometry_msgs message_runtime rosbag
   DEPENDS Boost Eigen
 )
 
@@ -183,7 +180,7 @@ SET(GCC_COVERAGE_COMPILE_FLAGS "-std=c++0x")
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 add_library(laser_geometry src/laser_geometry.cpp)
-target_link_libraries(laser_geometry ${Boost_LIBRARIES} ${tf_LIBRARIES})
+target_link_libraries(laser_geometry ${Boost_LIBRARIES})
 
 
 add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
@@ -197,7 +194,7 @@ add_executable(test_node_ src/test_node.cpp src/math_functions.cpp)
 add_executable(broadcast_wrapper_ src/Broadcast_Wrapper.cpp src/Serial_Wrapper.cpp)
 add_executable(broadcast_listener_ src/Broadcast_Listener.cpp)
 add_executable(pose_estimator_node_ src/main.cpp src/icp.cpp src/point2d.cpp
-                                   src/tree2d.cpp)
+                                   src/tree2d.cpp src/laser_geometry.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(state_ukf_node_ kalman_filters_generate_messages_cpp)

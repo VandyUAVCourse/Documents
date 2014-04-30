@@ -25,7 +25,6 @@
   <build_depend>message_generation</build_depend>
   <build_depend>rosbag</build_depend>
   <build_depend>imu_broadcast</build_depend>
-  <build_depend>angles</build_depend>
   <build_depend>boost</build_depend>
   <build_depend>tf</build_depend>
 
@@ -37,7 +36,6 @@
   <run_depend>message_runtime</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>imu_broadcast</run_depend>
-  <run_depend>angles</run_depend>
   <run_depend>boost</run_depend>
   <run_depend>tf</run_depend>
 

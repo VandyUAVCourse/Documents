@@ -74,6 +74,10 @@ navmap/kalman_filters.h
 imu_broadcast/raw_imu.h
 /home/UAVTeam/catkin_ws/src/navmap/include/navmap/imu_broadcast/raw_imu.h
 
+/home/UAVTeam/catkin_ws/src/navmap/src/math_functions.cpp
+navmap/kalman_filters.h
+/home/UAVTeam/catkin_ws/src/navmap/src/navmap/kalman_filters.h
+
 /home/UAVTeam/catkin_ws/src/navmap/src/state_ukf_node.cpp
 navmap/state_ukf_node.h
 /home/UAVTeam/catkin_ws/src/navmap/src/navmap/state_ukf_node.h
